@@ -1,0 +1,2353 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dashboard SCZ Global LLC</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+--bg0:#0D0A06;--bg1:#141008;--bg2:#1C1610;--bg3:#241D12;--bg4:#2E2416;
+--gold1:#F0C040;--gold2:#C9941A;--gold3:#A07010;--gold4:#7A5208;
+--text1:#F5EDD8;--text2:#C8B88A;--text3:#8A7245;
+--green:#5A9E6F;--red:#A05050;--amber:#B8903A;
+--border1:rgba(201,148,26,0.18);--border2:rgba(201,148,26,0.32);
+--blue:#4A90D9;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg0);color:var(--text1);}
+.dash{min-height:100vh;background:var(--bg0);}
+
+/* HEADER */
+.hdr{background:var(--bg3);border-bottom:1px solid var(--border2);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+.hdr-left{display:flex;flex-direction:column;gap:2px;}
+.hdr-title{font-size:20px;font-weight:700;color:var(--gold1);letter-spacing:1px;}
+.hdr-sub{font-size:10px;color:var(--text3);letter-spacing:2.5px;text-transform:uppercase;margin-bottom:6px;}
+.biz-btns{display:flex;gap:8px;margin-top:4px;}
+.biz-btn{background:transparent;border:1px solid var(--border2);color:var(--text2);padding:6px 18px;border-radius:7px;font-size:12px;cursor:pointer;transition:all .2s;font-weight:500;}
+.biz-btn:hover{border-color:var(--gold2);color:var(--gold1);}
+.biz-btn.active{background:rgba(240,192,64,.15);border-color:var(--gold1);color:var(--gold1);font-weight:700;}
+.live-wrap{display:flex;align-items:center;gap:7px;}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#5A9E6F;animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.8);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+.live-time{color:var(--text2);font-size:11px;}
+.live-lbl{font-size:10px;color:var(--text3);}
+
+.biz-pane{display:none;}
+.biz-pane.active{display:block;}
+
+/* TABS — same style for SA tabs AND ALMA subtabs */
+.tabs,.subtabs{display:flex;background:var(--bg2);border-bottom:1px solid var(--border1);padding:0 20px;overflow-x:auto;}
+.tab,.subtab{padding:11px 20px;font-size:12px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;color:var(--text3);transition:all .2s;white-space:nowrap;}
+.tab.active,.subtab.active{color:var(--gold1);border-bottom-color:var(--gold1);}
+.tab:hover:not(.active),.subtab:hover:not(.active){color:var(--text2);}
+.subpane{display:none;padding:16px 20px 28px;}
+.subpane.active{display:block;}
+.pane{display:none;padding:16px 20px 28px;}
+.pane.active{display:block;}
+
+/* DATE BAR — nuevo diseño con rango de fechas */
+.datebar{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.dlabel{font-size:11px;color:var(--text3);}
+.dbtn{background:transparent;border:1px solid var(--border1);color:var(--text3);padding:5px 14px;border-radius:6px;font-size:11px;cursor:pointer;transition:all .15s;}
+.dbtn:hover{border-color:var(--border2);color:var(--text2);}
+.dbtn.sel{background:rgba(240,192,64,.18);border-color:var(--gold1);color:var(--gold1);font-weight:700;box-shadow:0 0 8px rgba(240,192,64,.2);}
+.date-range-wrap{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border1);border-radius:6px;padding:4px 10px;}
+.date-range-wrap:focus-within{border-color:var(--gold2);}
+.date-range-wrap label{font-size:10px;color:var(--text3);}
+input[type=date]{background:transparent;border:none;color:var(--text2);font-size:11px;outline:none;cursor:pointer;padding:1px 0;}
+input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.5) sepia(1) saturate(2) hue-rotate(5deg);cursor:pointer;}
+.date-sep{font-size:10px;color:var(--text3);padding:0 2px;}
+.apply-range{background:rgba(201,148,26,.15);border:1px solid var(--gold2);color:var(--gold1);padding:4px 12px;border-radius:6px;font-size:11px;cursor:pointer;transition:all .15s;}
+.apply-range:hover{background:rgba(201,148,26,.28);}
+.cmp-btn{background:transparent;border:1px dashed var(--border2);color:var(--text3);padding:5px 13px;border-radius:6px;font-size:11px;cursor:pointer;transition:all .15s;}
+.cmp-btn:hover{border-color:var(--gold2);color:var(--text2);}
+.cmp-btn.on{background:rgba(90,158,111,.1);border:1px solid #5A9E6F;color:#5A9E6F;}
+
+/* COMPARE PANEL — por rango de fechas */
+.cmp-panel{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:14px 16px;margin-bottom:14px;display:none;}
+.cmp-panel.open{display:block;}
+.cmp-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.cmp-group{display:flex;align-items:center;gap:8px;}
+.cmp-tag{font-size:11px;color:var(--text3);}
+.cmp-date-block{display:flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;}
+.cmp-date-block label{font-size:10px;color:var(--text3);}
+.vs-sep{font-size:13px;color:var(--gold3);padding:0 6px;}
+.cmp-apply{background:rgba(201,148,26,.15);border:1px solid var(--gold2);color:var(--gold1);padding:5px 14px;border-radius:6px;font-size:11px;cursor:pointer;transition:all .15s;}
+.cmp-apply:hover{background:rgba(201,148,26,.25);}
+.col-head{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;padding:0 0 8px;border-bottom:1px solid var(--border1);margin-bottom:10px;}
+.col-head span{color:var(--gold1);}
+
+.sec{font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin:18px 0 10px;}
+
+/* CARDS */
+.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:8px;}
+.kcard{background:var(--bg3);border:1px solid var(--border1);border-radius:8px;padding:12px;min-width:0;}
+.kcard:hover{border-color:var(--border2);}
+.klbl{font-size:10px;color:var(--text3);margin-bottom:5px;line-height:1.3;}
+.kval{font-size:20px;font-weight:500;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.kval.g{color:var(--gold1);}
+.kdelta{font-size:10px;margin-top:3px;}
+.kdelta.up{color:var(--green);}
+.kdelta.dn{color:var(--red);}
+.kdelta.neu{color:var(--text3);}
+.kcard.accent{border-color:rgba(201,148,26,.38);background:linear-gradient(135deg,var(--bg3),rgba(201,148,26,.06));}
+
+.alert{border-radius:7px;padding:9px 13px;margin-top:10px;display:flex;align-items:flex-start;gap:8px;font-size:11px;line-height:1.5;}
+.alert.warn{background:rgba(160,80,80,.12);border:1px solid rgba(160,80,80,.3);color:#D08080;}
+.alert.info{background:rgba(201,148,26,.1);border:1px solid rgba(201,148,26,.2);color:var(--text2);}
+.alert.good{background:rgba(90,158,111,.1);border:1px solid rgba(90,158,111,.25);color:#7ABE8A;}
+.alert-ic{font-size:12px;flex-shrink:0;margin-top:1px;}
+
+.pgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;}
+.pcard{background:var(--bg3);border:1px solid var(--border1);border-radius:8px;padding:11px;text-align:center;min-width:0;}
+.ptag{font-size:10px;color:var(--text3);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pcount{font-size:22px;font-weight:500;color:var(--gold1);}
+.pmrr{font-size:10px;color:var(--green);margin-top:2px;}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:8px;}
+.mcard{background:var(--bg3);border-radius:8px;padding:11px;min-width:0;}
+.mcard.g{border:1px solid rgba(90,158,111,.25);}
+.mcard.r{border:1px solid rgba(160,80,80,.25);}
+.mcard.a{border:1px solid rgba(184,144,58,.3);}
+.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.mtitle{font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mpill{font-size:10px;padding:2px 7px;border-radius:8px;flex-shrink:0;}
+.mpill.g{background:#1E3D28;color:#7ABE8A;}
+.mpill.r{background:#3D1E1E;color:#D08080;}
+.mpill.a{background:#332510;color:#C9941A;}
+.mstats{display:flex;gap:10px;flex-wrap:wrap;}
+.msv{font-size:16px;font-weight:500;white-space:nowrap;}
+.msl{font-size:10px;color:var(--text3);}
+
+.wfall{background:var(--bg3);border:1px solid var(--border1);border-radius:8px;padding:14px;margin-top:10px;}
+.wrow{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(201,148,26,.07);}
+.wlbl{width:170px;font-size:11px;color:var(--text3);flex-shrink:0;}
+.wbar-w{flex:1;height:13px;background:var(--bg1);border-radius:3px;overflow:hidden;}
+.wbar{height:100%;border-radius:3px;}
+.wval{width:65px;text-align:right;font-size:12px;font-weight:500;flex-shrink:0;}
+.wval.g{color:var(--gold1);}
+.wval.gr{color:var(--green);}
+.wval.re{color:var(--red);}
+.wrow.total{border-top:1px solid var(--border2);border-bottom:none;margin-top:4px;padding-top:9px;}
+.cc{background:var(--bg3);border:1px solid var(--border1);border-radius:8px;padding:14px;margin-top:10px;}
+.ctitle{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px;}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);}
+.ld{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+/* META FUNNEL */
+.funnel-section{margin-top:10px;}
+.funnel-steps-horiz{display:flex;gap:0;align-items:stretch;justify-content:center;flex-wrap:wrap;gap:6px;}
+.fstep{background:var(--bg3);border:1px solid var(--border1);border-radius:10px;padding:14px 16px;flex:1;min-width:130px;max-width:200px;text-align:center;position:relative;}
+.fstep-icon{font-size:20px;margin-bottom:6px;}
+.fstep-name{font-size:10px;color:var(--text3);margin-bottom:6px;line-height:1.3;}
+.fstep-val{font-size:18px;font-weight:700;color:var(--gold1);}
+.fstep-arrow{display:flex;align-items:center;color:var(--text3);font-size:18px;padding:0 2px;align-self:center;}
+
+/* META TABLA */
+.table-wrap{overflow-x:auto;margin-top:10px;}
+table.dtable{width:100%;border-collapse:collapse;font-size:10px;}
+table.dtable th{background:var(--bg3);color:var(--text3);padding:7px 9px;text-align:right;border-bottom:1px solid var(--border2);white-space:nowrap;}
+table.dtable th:first-child{text-align:left;}
+table.dtable td{padding:6px 9px;text-align:right;border-bottom:1px solid rgba(201,148,26,.06);color:var(--text2);white-space:nowrap;}
+table.dtable td:first-child{text-align:left;color:var(--text3);}
+table.dtable tr:hover td{background:rgba(201,148,26,.04);}
+table.dtable tr.total-row td{background:var(--bg3);color:var(--gold1);font-weight:600;border-top:1px solid var(--border2);}
+
+/* META kgrid ajustada */
+.meta-kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:14px;}
+.meta-kcard{background:var(--bg3);border:1px solid var(--border1);border-radius:8px;padding:13px;min-width:0;}
+.meta-kcard.accent{border-color:rgba(201,148,26,.4);background:linear-gradient(135deg,var(--bg3),rgba(201,148,26,.07));}
+.meta-kcard.blue{border-color:rgba(74,144,217,.35);background:linear-gradient(135deg,var(--bg3),rgba(74,144,217,.06));}
+
+/* FUNNEL VISUAL — barras con métricas */
+.funnel-wrap{margin-top:8px;}
+.funnel-alert{background:var(--bg3);border-radius:6px;padding:6px 8px;font-size:10px;line-height:1.5;}
+.funnel-alert.ok{border:1px solid rgba(90,158,111,.25);color:#7ABE8A;}
+.funnel-alert.warn{border:1px solid rgba(160,80,80,.3);color:#D08080;}
+.funnel-alert.info{border:1px solid rgba(201,148,26,.2);color:var(--text2);}
+.funnel-group-title{font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;padding:10px 0 4px;border-top:1px solid var(--border1);margin-top:6px;}
+.funnel-group-title:first-child{border-top:none;margin-top:0;padding-top:0;}
+
+/* ── ALMA FUNNEL — diseño tabla limpia ── */
+.alma-funnel-table{width:100%;border-collapse:collapse;margin-top:8px;}
+.alma-funnel-table thead tr th{background:var(--bg2);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:7px 10px;text-align:left;border-bottom:1px solid var(--border2);}
+.alma-funnel-table thead tr th:nth-child(2),.alma-funnel-table thead tr th:nth-child(3){text-align:right;}
+.alma-funnel-table tbody tr{border-bottom:1px solid rgba(201,148,26,.07);transition:background .15s;}
+.alma-funnel-table tbody tr:hover{background:rgba(201,148,26,.04);}
+.alma-funnel-table tbody tr.group-header td{background:var(--bg2);color:var(--text3);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:5px 10px;font-weight:600;}
+.alma-funnel-table td{padding:7px 10px;font-size:11px;}
+.aft-code{color:var(--text3);font-size:10px;font-family:monospace;width:70px;}
+.aft-name{color:var(--text2);}
+.aft-val{text-align:right;font-weight:600;color:var(--gold1);font-size:12px;white-space:nowrap;}
+.aft-status{text-align:right;width:70px;}
+.status-pill{font-size:9px;padding:2px 8px;border-radius:10px;display:inline-block;white-space:nowrap;}
+.sp-ok{background:rgba(90,158,111,.15);color:#7ABE8A;border:1px solid rgba(90,158,111,.3);}
+.sp-warn{background:rgba(184,144,58,.15);color:#C9941A;border:1px solid rgba(184,144,58,.35);}
+.sp-bad{background:rgba(160,80,80,.15);color:#D08080;border:1px solid rgba(160,80,80,.3);}
+
+/* RESUMEN DE MEJORAS */
+.mejoras-box{background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:16px;margin-top:14px;}
+.mejoras-title{font-size:10px;color:var(--gold2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.mejora-item{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid rgba(201,148,26,.08);}
+.mejora-item:last-child{border-bottom:none;}
+.mejora-badge{font-size:9px;padding:2px 8px;border-radius:10px;white-space:nowrap;align-self:flex-start;margin-top:1px;}
+.mb-alto{background:rgba(160,80,80,.15);color:#D08080;border:1px solid rgba(160,80,80,.3);}
+.mb-medio{background:rgba(184,144,58,.15);color:#C9941A;border:1px solid rgba(184,144,58,.35);}
+.mejora-body{flex:1;}
+.mejora-kpi{font-size:11px;color:var(--text1);font-weight:600;margin-bottom:2px;}
+.mejora-desc{font-size:10px;color:var(--text3);line-height:1.5;}
+.mejora-impacto{font-size:10px;color:var(--amber);margin-top:3px;}
+
+/* CLOSERS */
+.closer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:10px;}
+.closer-card{background:var(--bg3);border:1px solid var(--border1);border-radius:8px;padding:12px;}
+.closer-name{font-size:11px;color:var(--gold2);font-weight:600;margin-bottom:8px;}
+.closer-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+.cs-item{text-align:center;}
+.cs-val{font-size:14px;font-weight:600;color:var(--text1);display:block;}
+.cs-lbl{font-size:9px;color:var(--text3);}
+</style>
+</head>
+<body>
+<div class="dash">
+
+<!-- ══════ HEADER ══════ -->
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-title">DASHBOARD SCZ GLOBAL LLC</div>
+    <div class="hdr-sub">Líneas de Negocio</div>
+    <div class="biz-btns">
+      <button class="biz-btn active" id="btn-alma" onclick="switchBiz('alma')">Aceleradora ALMA</button>
+      <button class="biz-btn" id="btn-sa" onclick="switchBiz('sa')">Spiritual Academy</button>
+      <button class="biz-btn" id="btn-fin" onclick="switchBiz('fin')">💼 Finanzas</button>
+    </div>
+  </div>
+  <div class="live-wrap">
+    <div class="live-dot"></div>
+    <div>
+      <div class="live-lbl">EN VIVO</div>
+      <div class="live-time" id="liveTime">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ACELERADORA ALMA
+══════════════════════════════════════════ -->
+<div class="biz-pane active" id="biz-alma">
+  <div class="subtabs">
+    <div class="subtab active" onclick="switchSubTab('alma','sales',this)">🤝 Ventas</div>
+    <div class="subtab" onclick="switchSubTab('alma','mkt',this)">📣 Marketing / ADS</div>
+  </div>
+
+  <!-- ── VENTAS ALMA ── -->
+  <div class="subpane active" id="alma-sales">
+    <div class="datebar">
+      <span class="dlabel">Periodo:</span>
+      <button class="dbtn" onclick="setToday('alma-sales',this)">Hoy</button>
+      <button class="dbtn sel" id="dbtn-este-alma-sales" onclick="setThisMonth('alma-sales',this)">Este mes</button>
+      <div class="date-range-wrap">
+        <label>De</label>
+        <input type="date" id="dFrom-alma-sales" value="2026-04-01">
+        <span class="date-sep">—</span>
+        <label>a</label>
+        <input type="date" id="dTo-alma-sales" value="2026-04-30">
+        <button class="apply-range" onclick="applyRange('alma-sales')">Aplicar</button>
+      </div>
+      <button class="cmp-btn" id="cmpbtn-alma-sales" onclick="toggleCmp('alma-sales')">Comparar VS</button>
+    </div>
+    <div class="cmp-panel" id="cmppanel-alma-sales">
+      <div class="cmp-row">
+        <div class="cmp-tag" style="font-weight:600;color:var(--gold2);">Periodo A:</div>
+        <div class="cmp-date-block"><label>De</label><input type="date" id="cmpA1-alma-sales" value="2026-04-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpA2-alma-sales" value="2026-04-12"></div>
+        <span class="vs-sep">VS</span>
+        <div class="cmp-tag" style="font-weight:600;color:var(--green);">Periodo B:</div>
+        <div class="cmp-date-block"><label>De</label><input type="date" id="cmpB1-alma-sales" value="2026-03-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpB2-alma-sales" value="2026-03-31"></div>
+        <button class="cmp-apply" onclick="showCmpInfo('alma-sales')">Aplicar comparación</button>
+      </div>
+      <div class="alert info" style="margin-top:10px;" id="cmpresult-alma-sales"><span class="alert-ic">◈</span>Selecciona los periodos y pulsa "Aplicar comparación".</div>
+    </div>
+
+    <div class="sec">KPIs Principales — USD</div>
+    <div id="normal-alma-sales">
+
+    <!-- FILA 1: KPIs resumen -->
+    <div class="kgrid" style="margin-bottom:8px;">
+      <div class="kcard accent" style="grid-column:span 2;"><div class="klbl">Ventas Totales</div><div class="kval g" id="alma-kpi-ventas">—</div><div class="kdelta neu">este mes</div></div>
+      <div class="kcard"><div class="klbl">Ticket Promedio</div><div class="kval g" id="alma-kpi-ticket">—</div><div class="kdelta neu">por cliente</div></div>
+      <div class="kcard accent"><div class="klbl">Leads Totales en Pipeline</div><div class="kval g" id="alma-kpi-leads-total">—</div><div class="kdelta neu">todas las etapas</div></div>
+    </div>
+
+    <!-- FILA 2: Pipeline por etapas -->
+    <div style="background:var(--bg2);border:1px solid var(--border1);border-radius:10px;padding:12px 14px;margin-bottom:8px;">
+      <div style="font-size:9px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">PIPELINE POR ETAPA</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
+
+        <!-- Pendiente por llamar -->
+        <div class="kcard" style="border-left:3px solid var(--gold3);">
+          <div class="klbl">Pendientes por Llamar</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <span style="font-size:22px;font-weight:600;color:var(--text1);" id="alma-kpi-pendiente-cnt">—</span>
+            <span style="font-size:11px;color:var(--gold2);" id="alma-kpi-pendiente-monto">—</span>
+          </div>
+          <div class="kdelta neu">leads por contactar</div>
+        </div>
+
+        <!-- Llamada Confirmada -->
+        <div class="kcard" style="border-left:3px solid var(--blue);">
+          <div class="klbl">Llamadas Confirmadas</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <span style="font-size:22px;font-weight:600;color:var(--text1);" id="alma-kpi-llamadas">—</span>
+            <span style="font-size:11px;color:var(--blue);" id="alma-kpi-llamadas-monto">—</span>
+          </div>
+          <div class="kdelta neu" id="alma-kpi-llamadas-delta">% conf.</div>
+        </div>
+
+        <!-- En Decisión -->
+        <div class="kcard" style="border-left:3px solid var(--amber);">
+          <div class="klbl">En Decisión</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <span style="font-size:22px;font-weight:600;color:var(--text1);" id="alma-kpi-decision-cnt">—</span>
+            <span style="font-size:11px;color:var(--amber);" id="alma-kpi-decision-monto">—</span>
+          </div>
+          <div class="kdelta neu" id="alma-kpi-decision-dias">— días promedio</div>
+        </div>
+
+        <!-- Pago Programado -->
+        <div class="kcard" style="border-left:3px solid var(--green);">
+          <div class="klbl">Pago Programado</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <span style="font-size:22px;font-weight:600;color:var(--text1);" id="alma-kpi-pago-cnt">—</span>
+            <span style="font-size:11px;color:var(--green);" id="alma-kpi-pago-monto">—</span>
+          </div>
+          <div class="kdelta neu">listos para cobrar</div>
+        </div>
+
+        <!-- Clientes Nuevos -->
+        <div class="kcard accent" style="border-left:3px solid var(--gold1);">
+          <div class="klbl">Clientes Nuevos</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <span style="font-size:22px;font-weight:600;color:var(--gold1);" id="alma-kpi-clientes">—</span>
+          </div>
+          <div class="kdelta neu" id="alma-kpi-clientes-delta">en el periodo</div>
+        </div>
+
+        <!-- No Cerrados -->
+        <div class="kcard" style="border-left:3px solid var(--red);">
+          <div class="klbl">No Cerrados</div>
+          <div style="display:flex;align-items:baseline;gap:8px;margin-top:4px;">
+            <span style="font-size:22px;font-weight:600;color:var(--red);" id="alma-kpi-nocerrados">—</span>
+          </div>
+          <div class="kdelta neu">leads perdidos</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Alerta Pago Programado sin tarea -->
+    <div id="alma-alerta-pago-prog" style="display:none;"></div>
+
+    <!-- Conversion -->
+    <div class="kgrid" style="margin-bottom:8px;">
+      <div class="kcard"><div class="klbl">% Conversión a Venta</div><div class="kval g" id="alma-kpi-conv">—</div><div class="kdelta neu">en pipeline</div></div>
+    </div>
+
+    <div class="sec">Rendimiento por Closer</div>
+    <div class="closer-grid" id="closer-grid"><div style="color:var(--text3);font-size:12px;padding:20px;">Cargando closers...</div></div>
+
+    <div class="sec">Embudo de Ventas</div>
+    <div style="overflow-x:auto;">
+      <table class="alma-funnel-table" id="alma-sales-table"><thead><tr>
+  <th>Métrica</th>
+  <th style="text-align:right">Resultado</th>
+  <th style="text-align:right">Estado</th>
+</tr></thead>
+<tbody id="alma-sales-funnel-body">
+  <tr><td><span class="aft-code">#Asistencias</span> <span class="aft-name">Personas que asistieron a la llamada</span></td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-pending">—</span></td></tr>
+  <tr><td><span class="aft-code">% Asistencia</span> <span class="aft-name">Tasa de asistencia sobre agendas</span></td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-pending">—</span></td></tr>
+  <tr><td><span class="aft-code"># Ventas</span> <span class="aft-name">Ventas cerradas en el período</span></td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-pending">—</span></td></tr>
+  <tr><td><span class="aft-code">% Conversión</span> <span class="aft-name">Tasa de cierre sobre asistentes</span></td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-pending">—</span></td></tr>
+  <tr><td><span class="aft-code">Días Cierre</span> <span class="aft-name">Días promedio entre sesión y venta</span></td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-pending">—</span></td></tr>
+  <tr><td><span class="aft-code">% Agenda→Venta</span> <span class="aft-name">De cada agenda, cuántas se convierten</span></td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-pending">—</span></td></tr>
+  <tr><td><span class="aft-code">Ticket Promedio</span> <span class="aft-name">Valor promedio de cada venta</span></td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-pending">—</span></td></tr>
+</tbody></table>
+    </div>
+    <div class="mejoras-box" id="alma-sales-mejoras" style="display:none;"></div>
+
+    <!-- NOTIFICACIONES INTELIGENTES IA -->
+    <div style="margin-top:18px;">
+      <div class="sec" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span>🤖 OPORTUNIDADES DE CRECIMIENTO</span>
+        <span style="font-size:9px;background:rgba(74,144,217,.15);color:#4A90D9;border:1px solid rgba(74,144,217,.3);padding:2px 8px;border-radius:8px;letter-spacing:1px;">IA</span>
+      </div>
+      <div id="alma-ai-notifs-wrap">
+        <div class="mejoras-box" style="border-color:rgba(74,144,217,.25);">
+          <div class="mejoras-title" style="color:#4A90D9;">● OPORTUNIDADES ACCIONABLES</div>
+          <div id="alma-ai-oportunidades"><div style="color:var(--text3);font-size:12px;padding:8px 0;">Las recomendaciones se generarán con datos reales.</div></div>
+        </div>
+        <div class="mejoras-box" style="margin-top:10px;border-color:rgba(160,80,80,.3);">
+          <div class="mejoras-title" style="color:#D08080;">⚠ ALERTAS CRÍTICAS</div>
+          <div id="alma-ai-alertas"><div style="color:var(--text3);font-size:12px;padding:8px 0;">—</div></div>
+        </div>
+        <div class="mejoras-box" style="margin-top:10px;border-color:rgba(90,158,111,.3);">
+          <div class="mejoras-title" style="color:#7ABE8A;">✅ RECOMENDACIONES — PRÓXIMOS 30 DÍAS</div>
+          <div id="alma-ai-recomendaciones"><div style="color:var(--text3);font-size:12px;padding:8px 0;">Las recomendaciones se generarán con datos reales.</div></div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- COMPARE VIEW ALMA SALES -->
+    <div id="cmpview-alma-sales" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 3px 1fr;gap:16px;align-items:start;">
+        <div>
+          <div id="headA-alma-sales" style="font-size:11px;font-weight:700;color:var(--gold2);padding:8px 0 10px;border-bottom:2px solid var(--gold2);margin-bottom:12px;letter-spacing:.5px;">PERIODO A</div>
+          <div id="colA-alma-sales-kpis" class="kgrid"></div>
+          <div id="colA-alma-sales-table" style="margin-top:12px;overflow-x:auto;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.22);min-height:400px;border-radius:2px;"></div>
+        <div>
+          <div id="headB-alma-sales" style="font-size:11px;font-weight:700;color:var(--green);padding:8px 0 10px;border-bottom:2px solid var(--green);margin-bottom:12px;letter-spacing:.5px;">PERIODO B</div>
+          <div id="colB-alma-sales-kpis" class="kgrid"></div>
+          <div id="colB-alma-sales-table" style="margin-top:12px;overflow-x:auto;"></div>
+        </div>
+      </div>
+      <div id="cmpinsight-alma-sales" style="margin-top:18px;"></div>
+    </div>
+  </div>
+
+  <!-- ── MARKETING ALMA ── -->
+  <div class="subpane" id="alma-mkt">
+    <div class="datebar">
+      <span class="dlabel">Periodo:</span>
+      <button class="dbtn" onclick="setToday('alma-mkt',this)">Hoy</button>
+      <button class="dbtn sel" id="dbtn-este-alma-mkt" onclick="setThisMonth('alma-mkt',this)">Este mes</button>
+      <div class="date-range-wrap">
+        <label>De</label>
+        <input type="date" id="dFrom-alma-mkt" value="2026-04-01">
+        <span class="date-sep">—</span>
+        <label>a</label>
+        <input type="date" id="dTo-alma-mkt" value="2026-04-30">
+        <button class="apply-range" onclick="applyRange('alma-mkt')">Aplicar</button>
+      </div>
+      <button class="cmp-btn" id="cmpbtn-alma-mkt" onclick="toggleCmp('alma-mkt')">Comparar VS</button>
+    </div>
+    <div class="cmp-panel" id="cmppanel-alma-mkt">
+      <div class="cmp-row">
+        <div class="cmp-tag" style="font-weight:600;color:var(--gold2);">Periodo A:</div>
+        <div class="cmp-date-block"><label>De</label><input type="date" id="cmpA1-alma-mkt" value="2026-04-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpA2-alma-mkt" value="2026-04-12"></div>
+        <span class="vs-sep">VS</span>
+        <div class="cmp-tag" style="font-weight:600;color:var(--green);">Periodo B:</div>
+        <div class="cmp-date-block"><label>De</label><input type="date" id="cmpB1-alma-mkt" value="2026-03-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpB2-alma-mkt" value="2026-03-31"></div>
+        <button class="cmp-apply" onclick="showCmpInfo('alma-mkt')">Aplicar comparación</button>
+      </div>
+      <div class="alert info" style="margin-top:10px;" id="cmpresult-alma-mkt"><span class="alert-ic">◈</span>Selecciona los periodos y pulsa "Aplicar comparación".</div>
+    </div>
+
+    <div class="sec">KPIs Principales — USD</div>
+    <div id="normal-alma-mkt">
+    <div class="kgrid">
+      <div class="kcard accent"><div class="klbl">Gasto Total</div><div class="kval" id="alma-meta-gasto2">—</div><div class="kdelta neu">inversión</div></div>
+      <div class="kcard"><div class="klbl">Clientes Nuevos</div><div class="kval g" id="alma-mkt-clientes">—</div><div class="kdelta up">este mes</div></div>
+      <div class="kcard"><div class="klbl">Costo por Cliente</div><div class="kval" id="alma-mkt-cac">—</div><div class="kdelta up">-$18 vs ant.</div></div>
+      <div class="kcard accent"><div class="klbl">Ventas Generadas</div><div class="kval g" id="alma-mkt-ventas">—</div><div class="kdelta up">+22%</div></div>
+      <div class="kcard accent"><div class="klbl">Ganancia Neta</div><div class="kval g" id="alma-mkt-ganancia">—</div><div class="kdelta up">margen 91%</div></div>
+      <div class="kcard accent"><div class="klbl">Retorno sobre Inversión</div><div class="kval g" id="alma-mkt-roi">—</div><div class="kdelta up">excelente</div></div>
+    </div>
+
+    <div class="sec">Embudo Completo de Marketing</div>
+    <div class="funnel-wrap" id="alma-mkt-funnel-wrap">
+      <div id="alma-mkt-funnel-bars" style="padding:4px 0;"></div>
+    </div>
+    <div class="mejoras-box" id="alma-mkt-mejoras" style="display:none;"></div>
+
+    <!-- NOTIFICACIONES INTELIGENTES IA MARKETING -->
+    <div style="margin-top:18px;">
+      <div class="sec" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span>🤖 OPORTUNIDADES DE CRECIMIENTO</span>
+        <span style="font-size:9px;background:rgba(74,144,217,.15);color:#4A90D9;border:1px solid rgba(74,144,217,.3);padding:2px 8px;border-radius:8px;letter-spacing:1px;">IA</span>
+      </div>
+      <div class="mejoras-box" style="border-color:rgba(74,144,217,.25);">
+        <div class="mejoras-title" style="color:#4A90D9;">● OPORTUNIDADES ACCIONABLES</div>
+        <div id="alma-mkt-ai-oportunidades"><div style="color:var(--text3);font-size:12px;padding:8px 0;">Las recomendaciones se generarán con datos reales.</div></div>
+      </div>
+      <div class="mejoras-box" style="margin-top:10px;border-color:rgba(160,80,80,.3);">
+        <div class="mejoras-title" style="color:#D08080;">⚠ ALERTAS CRÍTICAS</div>
+        <div id="alma-mkt-ai-alertas"><div style="color:var(--text3);font-size:12px;padding:8px 0;">—</div></div>
+      </div>
+      <div class="mejoras-box" style="margin-top:10px;border-color:rgba(90,158,111,.3);">
+        <div class="mejoras-title" style="color:#7ABE8A;">✅ RECOMENDACIONES — PRÓXIMOS 30 DÍAS</div>
+        <div id="alma-mkt-ai-recomendaciones"><div style="color:var(--text3);font-size:12px;padding:8px 0;">Las recomendaciones se generarán con datos reales.</div></div>
+      </div>
+    </div>
+    </div>
+
+    <!-- COMPARE VIEW ALMA MKT -->
+    <div id="cmpview-alma-mkt" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 3px 1fr;gap:16px;align-items:start;">
+        <div>
+          <div id="headA-alma-mkt" style="font-size:11px;font-weight:700;color:var(--gold2);padding:8px 0 10px;border-bottom:2px solid var(--gold2);margin-bottom:12px;letter-spacing:.5px;">PERIODO A</div>
+          <div id="colA-alma-mkt-kpis" class="kgrid"></div>
+          <div id="colA-alma-mkt-table" style="margin-top:12px;overflow-x:auto;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.22);min-height:400px;border-radius:2px;"></div>
+        <div>
+          <div id="headB-alma-mkt" style="font-size:11px;font-weight:700;color:var(--green);padding:8px 0 10px;border-bottom:2px solid var(--green);margin-bottom:12px;letter-spacing:.5px;">PERIODO B</div>
+          <div id="colB-alma-mkt-kpis" class="kgrid"></div>
+          <div id="colB-alma-mkt-table" style="margin-top:12px;overflow-x:auto;"></div>
+        </div>
+      </div>
+      <div id="cmpinsight-alma-mkt" style="margin-top:18px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SPIRITUAL ACADEMY
+══════════════════════════════════════════ -->
+<div class="biz-pane" id="biz-sa">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('sa','stripe',this)">💰 Ventas</div>
+    <div class="tab" onclick="switchTab('sa','meta',this)">📣 Marketing / ADS</div>
+  </div>
+
+  <!-- ══ VENTAS (STRIPE) ══ -->
+  <div class="pane active" id="sa-pane-stripe">
+    <div class="datebar">
+      <span class="dlabel">Periodo:</span>
+      <button class="dbtn" onclick="setToday('stripe',this)">Hoy</button>
+      <button class="dbtn sel" id="dbtn-este-stripe" onclick="setThisMonth('stripe',this)">Este mes</button>
+      <div class="date-range-wrap">
+        <label>De</label>
+        <input type="date" id="dFrom-stripe" value="2026-04-01">
+        <span class="date-sep">—</span>
+        <label>a</label>
+        <input type="date" id="dTo-stripe" value="2026-04-30">
+        <button class="apply-range" onclick="applyRange('stripe')">Aplicar</button>
+      </div>
+      <button class="cmp-btn" id="cmpbtn-stripe" onclick="toggleCmp('stripe')">Comparar VS</button>
+    </div>
+
+    <div class="cmp-panel" id="cmppanel-stripe">
+      <div class="cmp-row">
+        <div class="cmp-tag" style="font-weight:600;color:var(--gold2);">Periodo A:</div>
+        <div class="cmp-date-block"><label>De</label><input type="date" id="cmpA1-stripe" value="2026-04-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpA2-stripe" value="2026-04-30"></div>
+        <span class="vs-sep">VS</span>
+        <div class="cmp-tag" style="font-weight:600;color:var(--green);">Periodo B:</div>
+        <div class="cmp-date-block"><label>De</label><input type="date" id="cmpB1-stripe" value="2026-03-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpB2-stripe" value="2026-03-31"></div>
+        <button class="cmp-apply" onclick="applyCmpStripe()">Aplicar comparación</button>
+      </div>
+    </div>
+
+    <div id="normal-stripe">
+      <div class="sec">KPIs Principales — USD</div>
+      <div class="kgrid">
+        <div class="kcard"><div class="klbl">Ingresos Mensuales Recurrentes (MRR)</div><div class="kval g" id="kpi-mrr">—</div><div class="kdelta up">+12.4% vs ant.</div></div>
+        <div class="kcard"><div class="klbl">MRR Nuevo este mes</div><div class="kval" id="kpi-newmrr">—</div><div class="kdelta up">+8.1%</div></div>
+        <div class="kcard"><div class="klbl">Crecimiento Neto MRR</div><div class="kval g" id="kpi-crec">—</div><div class="kdelta up">neto este mes</div></div>
+        <div class="kcard"><div class="klbl">Clientes Activos</div><div class="kval" id="kpi-clientes">—</div><div class="kdelta up">+24 este mes</div></div>
+        <div class="kcard"><div class="klbl">Pruebas Gratuitas Iniciadas</div><div class="kval" id="kpi-trials">—</div><div class="kdelta neu">este mes</div></div>
+        <div class="kcard"><div class="klbl">Tasa de Conversión Trial</div><div class="kval g" id="kpi-conv">—</div><div class="kdelta up">+3pts vs ant.</div></div>
+        <div class="kcard"><div class="klbl">Clientes Nuevos</div><div class="kval" id="kpi-nuevos">—</div><div class="kdelta up">+15%</div></div>
+        <div class="kcard"><div class="klbl">Tasa de Cancelación</div><div class="kval" id="kpi-churn">—</div><div class="kdelta dn">objetivo &lt;3%</div></div>
+        <div class="kcard"><div class="klbl">Valor de Vida del Cliente (LTV)</div><div class="kval g" id="kpi-ltv2">—</div><div class="kdelta up">+$40</div></div>
+      </div>
+      <div class="alert good"><span class="alert-ic">✦</span>Conversión de prueba gratuita al 68% — muy por encima del promedio SaaS (45%). Excelente retención temprana.</div>
+      <div class="alert warn"><span class="alert-ic">!</span>Cancelaciones al 4.2% — supera el objetivo del 3%. Revisar motivos de salida en plan Básico mensual.</div>
+
+      <div class="sec">Clientes Activos por Plan</div>
+      <div class="pgrid">
+        <div class="pcard"><div class="ptag">Básico · mensual</div><div class="pcount" id="plan-bm-cnt">—</div><div class="pmrr" id="plan-bm-mrr">—</div></div>
+        <div class="pcard"><div class="ptag">Básico · anual</div><div class="pcount" id="plan-ba-cnt">—</div><div class="pmrr" id="plan-ba-mrr">—</div></div>
+        <div class="pcard"><div class="ptag">Pro · mensual</div><div class="pcount" id="plan-pm-cnt">—</div><div class="pmrr" id="plan-pm-mrr">—</div></div>
+        <div class="pcard"><div class="ptag">Pro · anual</div><div class="pcount" id="plan-pa-cnt">—</div><div class="pmrr" id="plan-pa-mrr">—</div></div>
+      </div>
+      <div class="alert info"><span class="alert-ic">◈</span>Solo el 23% elige plan anual. Un mayor incentivo de descuento podría reducir cancelaciones y mejorar el valor de vida del cliente.</div>
+
+      <div class="sec">Movimientos del MRR</div>
+      <div class="mgrid">
+        <div class="mcard g"><div class="mhdr"><span class="mtitle">Renovaciones</span><span class="mpill g">+</span></div><div class="mstats"><div><div class="msv" id="mov-renov-cnt">—</div><div class="msl">#</div></div><div><div class="msv" id="mov-renov-pct">—</div><div class="msl">%</div></div><div><div class="msv" id="mov-renov-mrr" style="color:var(--green)">—</div><div class="msl">$</div></div></div></div>
+        <div class="mcard r"><div class="mhdr"><span class="mtitle">Cancelaciones</span><span class="mpill r">−</span></div><div class="mstats"><div><div class="msv" id="mov-cancel-cnt">—</div><div class="msl">#</div></div><div><div class="msv" id="mov-cancel-pct">—</div><div class="msl">%</div></div><div><div class="msv" id="mov-cancel-mrr" style="color:var(--red)">—</div><div class="msl">$</div></div></div></div>
+        <div class="mcard g"><div class="mhdr"><span class="mtitle">Reactivaciones</span><span class="mpill g">↑</span></div><div class="mstats"><div><div class="msv" id="mov-reac-cnt">—</div><div class="msl">#</div></div><div><div class="msv" id="mov-reac-pct">—</div><div class="msl">%</div></div><div><div class="msv" id="mov-reac-mrr" style="color:var(--green)">—</div><div class="msl">$</div></div></div></div>
+        <div class="mcard a"><div class="mhdr"><span class="mtitle">Mejoras de Plan</span><span class="mpill a">▲</span></div><div class="mstats"><div><div class="msv" id="mov-upgrade-cnt">—</div><div class="msl">#</div></div><div><div class="msv" id="mov-upgrade-pct">—</div><div class="msl">%</div></div><div><div class="msv" style="color:var(--gold2)" id="mov-upgrade-mrr">—</div><div class="msl">$</div></div></div></div>
+        <div class="mcard r"><div class="mhdr"><span class="mtitle">Degradaciones de Plan</span><span class="mpill r">▼</span></div><div class="mstats"><div><div class="msv">7</div><div class="msl">#</div></div><div><div class="msv" id="mov-down-pct">—</div><div class="msl">%</div></div><div><div class="msv" style="color:var(--red)" id="mov-down-mrr">—</div><div class="msl">$</div></div></div></div>
+      </div>
+
+      <div class="wfall">
+        <div class="ctitle">DESGLOSE MRR — PUENTE MENSUAL (USD)</div>
+        <div class="wrow"><div class="wlbl">MRR inicio de mes</div><div class="wbar-w"><div class="wbar" style="width:87%;background:rgba(201,148,26,.35);"></div></div><div class="wval g"><span id="bridge-inicio">—</span></div></div>
+        <div class="wrow"><div class="wlbl">+ MRR Nuevo</div><div class="wbar-w"><div class="wbar" style="width:29%;background:var(--green);opacity:.7;"></div></div><div class="wval gr"><span id="bridge-nuevo">—</span></div></div>
+        <div class="wrow"><div class="wlbl">+ Mejoras de Plan</div><div class="wbar-w"><div class="wbar" style="width:10%;background:var(--green);opacity:.6;"></div></div><div class="wval gr"><span id="bridge-upgrades">—</span></div></div>
+        <div class="wrow"><div class="wlbl">+ Reactivaciones</div><div class="wbar-w"><div class="wbar" style="width:6%;background:var(--green);opacity:.5;"></div></div><div class="wval gr"><span id="bridge-reac">—</span></div></div>
+        <div class="wrow"><div class="wlbl">− Cancelaciones</div><div class="wbar-w"><div class="wbar" style="width:10%;background:var(--red);opacity:.7;"></div></div><div class="wval re"><span id="bridge-cancel">—</span></div></div>
+        <div class="wrow"><div class="wlbl">− Degradaciones de Plan</div><div class="wbar-w"><div class="wbar" style="width:4%;background:var(--red);opacity:.5;"></div></div><div class="wval re"><span id="bridge-down">—</span></div></div>
+        <div class="wrow total"><div class="wlbl" style="color:var(--gold1);font-weight:500;">MRR fin de mes</div><div class="wbar-w"><div class="wbar" style="width:100%;background:var(--gold2);"></div></div><div class="wval g" style="font-size:14px;"><span id="bridge-fin">—</span></div></div>
+      </div>
+
+      <div class="cc">
+        <div class="ctitle">EVOLUCIÓN DEL MRR — MES A MES (USD)</div>
+        <div class="legend">
+          <span class="li"><span class="ld" style="background:var(--gold1);border-radius:50%;width:8px;height:8px;"></span>MRR Total</span>
+          <span class="li"><span class="ld" style="background:var(--green);border-radius:50%;width:8px;height:8px;"></span>MRR Nuevo</span>
+          <span class="li"><span class="ld" style="background:var(--red);border-radius:50%;width:8px;height:8px;"></span>MRR Cancelado</span>
+        </div>
+        <div style="position:relative;width:100%;height:210px;">
+          <canvas id="mrrLine"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARE STRIPE -->
+    <div id="cmpview-stripe" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 3px 1fr;gap:16px;align-items:start;">
+        <div>
+          <div id="headA-stripe" style="font-size:11px;font-weight:700;color:var(--gold2);padding:8px 0 10px;border-bottom:2px solid var(--gold2);margin-bottom:12px;letter-spacing:.5px;">PERIODO A</div>
+          <div id="colA-stripe-kpis" class="kgrid"></div>
+          <div id="colA-stripe-movs" style="margin-top:10px;"></div>
+          <div id="colA-stripe-table" style="margin-top:10px;overflow-x:auto;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.22);min-height:400px;border-radius:2px;"></div>
+        <div>
+          <div id="headB-stripe" style="font-size:11px;font-weight:700;color:var(--green);padding:8px 0 10px;border-bottom:2px solid var(--green);margin-bottom:12px;letter-spacing:.5px;">PERIODO B</div>
+          <div id="colB-stripe-kpis" class="kgrid"></div>
+          <div id="colB-stripe-movs" style="margin-top:10px;"></div>
+          <div id="colB-stripe-table" style="margin-top:10px;overflow-x:auto;"></div>
+        </div>
+      </div>
+      <div id="cmpinsight-stripe" style="margin-top:18px;"></div>
+    </div>
+  </div>
+
+  <!-- ══ MARKETING / ADS (META) ══ -->
+  <div class="pane" id="sa-pane-meta">
+    <div class="datebar">
+      <span class="dlabel">Periodo:</span>
+      <button class="dbtn" onclick="setToday('meta',this)">Hoy</button>
+      <button class="dbtn sel" id="dbtn-este-meta" onclick="setThisMonth('meta',this)">Este mes</button>
+      <div class="date-range-wrap">
+        <label>De</label>
+        <input type="date" id="dFrom-meta" value="2026-04-01">
+        <span class="date-sep">—</span>
+        <label>a</label>
+        <input type="date" id="dTo-meta" value="2026-04-30">
+        <button class="apply-range" onclick="applyRange('meta')">Aplicar</button>
+      </div>
+      <button class="cmp-btn" id="cmpbtn-meta" onclick="toggleCmp('meta')">Comparar VS</button>
+    </div>
+
+    <div class="cmp-panel" id="cmppanel-meta">
+      <div class="cmp-row">
+        <div class="cmp-tag" style="font-weight:600;color:var(--gold2);">Periodo A:</div>
+        <div class="cmp-date-block"><label>De</label><input type="date" id="cmpA1-meta" value="2026-04-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpA2-meta" value="2026-04-30"></div>
+        <span class="vs-sep">VS</span>
+        <div class="cmp-tag" style="font-weight:600;color:var(--green);">Periodo B:</div>
+        <div class="cmp-date-block"><label>De</label><input type="date" id="cmpB1-meta" value="2026-03-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpB2-meta" value="2026-03-31"></div>
+        <button class="cmp-apply" onclick="applyCmpMeta()">Aplicar comparación</button>
+      </div>
+    </div>
+
+    <div id="normal-meta">
+      <div class="sec">Métricas Principales — USD</div>
+      <div class="meta-kgrid">
+        <div class="meta-kcard accent"><div class="klbl">Gasto Total</div><div class="kval" id="meta-kpi-gasto">—</div><div class="kdelta neu">este mes</div></div>
+        <div class="meta-kcard"><div class="klbl">Pruebas Gratuitas Iniciadas</div><div class="kval g" id="meta-kpi-trials">—</div><div class="kdelta up">este mes</div></div>
+        <div class="meta-kcard"><div class="klbl">Costo por Prueba Gratuita</div><div class="kval" id="meta-kpi-cptrial">—</div><div class="kdelta up">-$4.20</div></div>
+        <div class="meta-kcard blue"><div class="klbl">Ventas Esperadas (histórico)</div><div class="kval g" id="meta-kpi-ventesp">—</div><div class="kdelta neu">68% conv. trial</div></div>
+        <div class="meta-kcard accent"><div class="klbl">Retorno sobre Inversión (ROAS)</div><div class="kval g" id="meta-kpi-roas">—</div><div class="kdelta up">+0.4 vs ant.</div></div>
+        <div class="meta-kcard"><div class="klbl">Tasa de Conversión Página Web</div><div class="kval" id="meta-kpi-convweb">—</div><div class="kdelta up">+0.6pts</div></div>
+        <div class="meta-kcard blue"><div class="klbl">ROAS Esperado</div><div class="kval g" id="meta-kpi-roasesp">—</div><div class="kdelta up">proyección</div></div>
+        <div class="meta-kcard blue"><div class="klbl">Facturación Esperada (MRR Nuevo)</div><div class="kval g" id="meta-kpi-billesp">—</div><div class="kdelta up">+8.1%</div></div>
+      </div>
+
+      <div class="sec">Embudo de Costos — ¿Dónde se pierde el dinero?</div>
+      <div class="funnel-steps-horiz">
+        <div class="fstep" style="border-top:3px solid var(--gold2);">
+          <div class="fstep-icon">📢</div>
+          <div class="fstep-name">Costo por 1,000 Impresiones (CPM)</div>
+          <div class="fstep-val" id="meta-cpm">—</div>
+          <div class="kdelta up" style="font-size:10px;margin-top:4px;">✦ Rango saludable</div>
+        </div>
+        <div class="fstep-arrow">›</div>
+        <div class="fstep" style="border-top:3px solid var(--blue);">
+          <div class="fstep-icon">🖱️</div>
+          <div class="fstep-name">Costo por Clic (CPC)</div>
+          <div class="fstep-val" style="color:var(--blue);" id="meta-cpc">—</div>
+          <div class="kdelta up" style="font-size:10px;margin-top:4px;">✦ Excelente</div>
+        </div>
+        <div class="fstep-arrow">›</div>
+        <div class="fstep" style="border-top:3px solid var(--green);">
+          <div class="fstep-icon">🌐</div>
+          <div class="fstep-name">Costo por Visita a la Página</div>
+          <div class="fstep-val" style="color:var(--green);" id="meta-cpvisita">—</div>
+          <div class="kdelta neu" style="font-size:10px;margin-top:4px;">◈ Aceptable</div>
+        </div>
+        <div class="fstep-arrow">›</div>
+        <div class="fstep" style="border-top:3px solid var(--red);">
+          <div class="fstep-icon">🎯</div>
+          <div class="fstep-name">Costo por Prueba Gratuita</div>
+          <div class="fstep-val" style="color:var(--red);" id="meta-cptrial2">—</div>
+          <div class="kdelta dn" style="font-size:10px;margin-top:4px;">⚠️ Cuello de botella</div>
+        </div>
+      </div>
+      
+
+      <div class="sec" id="meta-daily-title">Movimiento Diario de la Pauta</div>
+      <div style="overflow-x:auto;">
+        <table class="alma-funnel-table" id="sa-meta-daily-table">
+          <thead><tr>
+            <th>Fecha</th>
+            <th style="text-align:right">Gasto Acum.</th>
+            <th style="text-align:right">Gasto Día</th>
+            <th style="text-align:right">Impresiones</th>
+            <th style="text-align:right">CPM</th>
+            <th style="text-align:right">Clics</th>
+            <th style="text-align:right">CPC</th>
+            <th style="text-align:right">CTR</th>
+            <th style="text-align:right">Costo/Visita</th>
+            <th style="text-align:right">Trials</th>
+            <th style="text-align:right">Costo/Trial</th>
+            <th style="text-align:right">Conv. Página</th>
+          </tr></thead>
+          <tbody id="sa-meta-daily-body"><tr><td colspan="12" style="text-align:center;color:var(--text3);padding:16px;font-size:12px;">— Los datos diarios cargarán desde Meta Ads —</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="cc" style="margin-top:14px;">
+        <div class="ctitle">PRUEBAS GRATUITAS INICIADAS Y VALOR DEL TRIAL — ÚLTIMOS 6 MESES</div>
+        <div class="legend">
+          <span class="li"><span class="ld" style="background:var(--gold1);border-radius:50%;width:8px;height:8px;"></span>Trials iniciados</span>
+          <span class="li"><span class="ld" style="background:var(--blue);border-radius:50%;width:8px;height:8px;"></span>Costo por Trial (USD)</span>
+        </div>
+        <div style="position:relative;width:100%;height:200px;">
+          <canvas id="trialChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARE META -->
+    <div id="cmpview-meta" style="display:none;">
+      <div style="display:grid;grid-template-columns:1fr 3px 1fr;gap:16px;align-items:start;">
+        <div>
+          <div id="headA-meta" style="font-size:11px;font-weight:700;color:var(--gold2);padding:8px 0 10px;border-bottom:2px solid var(--gold2);margin-bottom:12px;letter-spacing:.5px;">PERIODO A</div>
+          <div id="colA-meta-kpis" class="kgrid"></div>
+          <div id="colA-meta-funnel" style="margin-top:10px;"></div>
+        </div>
+        <div style="background:rgba(255,255,255,0.22);min-height:400px;border-radius:2px;"></div>
+        <div>
+          <div id="headB-meta" style="font-size:11px;font-weight:700;color:var(--green);padding:8px 0 10px;border-bottom:2px solid var(--green);margin-bottom:12px;letter-spacing:.5px;">PERIODO B</div>
+          <div id="colB-meta-kpis" class="kgrid"></div>
+          <div id="colB-meta-funnel" style="margin-top:10px;"></div>
+        </div>
+      </div>
+      <div id="cmpinsight-meta" style="margin-top:18px;"></div>
+    </div>
+  </div>
+</div><!-- end biz-sa -->
+
+<!-- ══════════════════════════════════════════
+     FINANZAS
+══════════════════════════════════════════ -->
+<div class="biz-pane" id="biz-fin">
+  <div class="datebar" style="padding:16px 20px 0;">
+    <span class="dlabel">Periodo:</span>
+    <button class="dbtn" onclick="setToday('fin',this)">Hoy</button>
+    <button class="dbtn sel" id="dbtn-este-fin" onclick="setThisMonth('fin',this)">Este mes</button>
+    <div class="date-range-wrap">
+      <label>De</label>
+      <input type="date" id="dFrom-fin" value="2026-04-01">
+      <span class="date-sep">—</span>
+      <label>a</label>
+      <input type="date" id="dTo-fin" value="2026-04-30">
+      <button class="apply-range" onclick="applyRange('fin')">Aplicar</button>
+    </div>
+    <button class="cmp-btn" id="cmpbtn-fin" onclick="toggleCmp('fin')">Comparar VS</button>
+  </div>
+  <div class="cmp-panel" id="cmppanel-fin" style="margin:10px 20px 0;">
+    <div class="cmp-row">
+      <div class="cmp-tag" style="font-weight:600;color:var(--gold2);">Periodo A:</div>
+      <div class="cmp-date-block"><label>De</label><input type="date" id="cmpA1-fin" value="2026-04-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpA2-fin" value="2026-04-30"></div>
+      <span class="vs-sep">VS</span>
+      <div class="cmp-tag" style="font-weight:600;color:var(--green);">Periodo B:</div>
+      <div class="cmp-date-block"><label>De</label><input type="date" id="cmpB1-fin" value="2026-03-01"><span class="date-sep">—</span><label>a</label><input type="date" id="cmpB2-fin" value="2026-03-31"></div>
+      <button class="cmp-apply" onclick="applyCmpFin()">Aplicar comparación</button>
+    </div>
+    <div class="alert info" style="margin-top:10px;" id="cmpresult-fin"><span class="alert-ic">◈</span>Selecciona los periodos y pulsa "Aplicar comparación".</div>
+  </div>
+
+  <div style="padding:16px 20px 28px;" id="normal-fin">
+    <!-- ESTADO FINANCIERO PUNTUAL -->
+    <div class="sec" id="fin-periodo-title">📊 Estado Financiero Puntual</div>
+    <div class="kgrid">
+      <div class="kcard accent"><div class="klbl">Ingresos Totales (consolidado)</div><div class="kval g" id="fin-ingresos">—</div><div class="kdelta up">+18.3% vs periodo ant.</div></div>
+      <div class="kcard accent"><div class="klbl">Costos Directos Totales</div><div class="kval" id="fin-costo-fijo">—</div><div class="kdelta neu">pauta SA + ALMA</div></div>
+      <div class="kcard accent"><div class="klbl">Costos Compartidos</div><div class="kval" id="fin-costo-var">—</div><div class="kdelta neu">CRM, herramientas, ops.</div></div>
+      <div class="kcard accent"><div class="klbl">Costos Operativos Equipo</div><div class="kval" id="fin-mkt">—</div><div class="kdelta neu">closers + plataforma SA</div></div>
+      <div class="kcard accent"><div class="klbl">Ganancia Bruta</div><div class="kval g" id="fin-margen">—</div><div class="kdelta up">margen 89%</div></div>
+      <div class="kcard accent"><div class="klbl">Ganancia Neta</div><div class="kval g" id="fin-neto">—</div><div class="kdelta up">margen 76%</div></div>
+    </div>
+
+    <!-- DESGLOSE POR LÍNEA DE NEGOCIO -->
+    <div class="sec">Desglose por Línea de Negocio — Costos Compartidos Prorrateados</div>
+    <div style="overflow-x:auto;">
+      <table class="alma-funnel-table">
+        <thead><tr><th>Concepto</th><th style="text-align:right">Ingresos</th><th style="text-align:right">Costo Directo</th><th style="text-align:right">Costo Compartido</th><th style="text-align:right">Margen Neto</th><th style="text-align:right">Estado</th></tr></thead>
+        <tbody>
+          <tr class="group-header"><td colspan="6">▸ SPIRITUAL ACADEMY — 25% del ingreso consolidado</td></tr>
+          <tr><td><span class="aft-code">SA · MRR</span> <span class="aft-name">Ingresos mensuales recurrentes por suscripciones</span></td><td class="aft-val">—</td><td class="aft-val" style="color:var(--red)">—</td><td class="aft-val" style="color:var(--amber)">—</td><td class="aft-val" style="color:var(--green)">—</td><td class="aft-status"><span class="status-pill sp-ok">✓ Bien</span></td></tr>
+          <tr class="group-header"><td colspan="6">▸ ACELERADORA ALMA — 75% del ingreso consolidado</td></tr>
+          <tr><td><span class="aft-code">AL · Ventas</span> <span class="aft-name">Facturación por cierres de ventas del mes</span></td><td class="aft-val">—</td><td class="aft-val" style="color:var(--red)">—</td><td class="aft-val" style="color:var(--amber)">—</td><td class="aft-val" style="color:var(--green)">—</td><td class="aft-status"><span class="status-pill sp-ok">✓ Bien</span></td></tr>
+          <tr class="group-header"><td colspan="6">▸ COSTOS COMPARTIDOS — Distribuidos según % de ingresos</td></tr>
+          <tr><td><span class="aft-code">CRM</span> <span class="aft-name">GoHighLevel / HubSpot — gestión de clientes y pipeline</span></td><td class="aft-val">—</td><td class="aft-val" style="color:var(--red)">—</td><td class="aft-val" style="color:var(--amber)">SA $200 / AL $600</td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-ok">✓ Fijo</span></td></tr>
+          <tr><td><span class="aft-code">Plataformas</span> <span class="aft-name">Zoom, Slack, Notion, email marketing, storage</span></td><td class="aft-val">—</td><td class="aft-val" style="color:var(--red)">—</td><td class="aft-val" style="color:var(--amber)">SA $155 / AL $465</td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-ok">✓ Fijo</span></td></tr>
+          <tr><td><span class="aft-code">Admón.</span> <span class="aft-name">Contabilidad, legal, administración compartida</span></td><td class="aft-val">—</td><td class="aft-val" style="color:var(--red)">—</td><td class="aft-val" style="color:var(--amber)">SA $245 / AL $735</td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-ok">✓ Fijo</span></td></tr>
+          <tr><td><span class="aft-code">Closers</span> <span class="aft-name">Equipo de ventas Aceleradora (comisiones + base)</span></td><td class="aft-val">—</td><td class="aft-val" style="color:var(--red)">—</td><td class="aft-val" style="color:var(--amber)">100% ALMA</td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-ok">✓ Controlado</span></td></tr>
+          <tr><td><span class="aft-code">Soporte SA</span> <span class="aft-name">Equipo de soporte y éxito del cliente SA</span></td><td class="aft-val">—</td><td class="aft-val" style="color:var(--red)">—</td><td class="aft-val" style="color:var(--amber)">100% SA</td><td class="aft-val">—</td><td class="aft-status"><span class="status-pill sp-ok">✓ Controlado</span></td></tr>
+          <tr class="group-header" style="border-top:1px solid var(--border2);"><td colspan="6">▸ CONSOLIDADO TOTAL SCZ GLOBAL LLC</td></tr>
+          <tr><td><span class="aft-code">TOTAL</span> <span class="aft-name">Resultado neto del período seleccionado</span></td><td class="aft-val">—</td><td class="aft-val" style="color:var(--red)">—</td><td class="aft-val" style="color:var(--amber)">—</td><td class="aft-val" style="color:var(--gold1)">—</td><td class="aft-status"><span class="status-pill sp-ok">✓ Positivo</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- COMPARE VIEW FINANZAS -->
+  <div style="padding:16px 20px 28px;display:none;" id="cmpview-fin">
+    <div style="display:grid;grid-template-columns:1fr 2px 1fr;gap:16px;align-items:start;">
+      <!-- PERIODO A -->
+      <div>
+        <div class="col-head" id="headA-fin" style="font-size:11px;color:var(--gold2);padding-bottom:10px;border-bottom:1px solid var(--border2);margin-bottom:12px;">Periodo A</div>
+        <div id="finA-kpis" class="kgrid"></div>
+        <div id="finA-table" style="margin-top:12px;overflow-x:auto;"></div>
+      </div>
+      <!-- DIVISOR -->
+      <div style="background:rgba(255,255,255,0.18);min-height:300px;border-radius:2px;"></div>
+      <!-- PERIODO B -->
+      <div>
+        <div class="col-head" id="headB-fin" style="font-size:11px;color:var(--green);padding-bottom:10px;border-bottom:1px solid var(--border2);margin-bottom:12px;">Periodo B</div>
+        <div id="finB-kpis" class="kgrid"></div>
+        <div id="finB-table" style="margin-top:12px;overflow-x:auto;"></div>
+      </div>
+    </div>
+    <!-- ANÁLISIS COMPARATIVO -->
+    <div id="fin-cmp-analysis" style="margin-top:18px;"></div>
+  </div>
+
+
+
+</div><!-- end .dash -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+
+// ══════════════════════════════════════════════════════
+// API v3 — Conexion con Google Apps Script
+// ══════════════════════════════════════════════════════
+const API_URL = 'https://script.google.com/macros/s/AKfycbxJFlkxlJECYIbAjUHQqHVkp4_CZDBjzBswAQGbfnbQlx17nPUE3GVaslAtiBHSTZHG/exec';
+const liveData = { stripeSA: null, stripeALMA: null, metaSA: null, metaALMA: null, ghlALMA: null };
+const dataCache = {};
+const apiStatus = {};  // Track connection status for notifications
+
+function getTodayISO() {
+  const n = new Date();
+  return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0');
+}
+function getDateRange(tab) {
+  const from = document.getElementById('dFrom-'+tab)?.value || getTodayISO();
+  const to   = document.getElementById('dTo-'+tab)?.value   || getTodayISO();
+  return { from, to };
+}
+function showAPIError(containerId, msg) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const div = document.createElement('div');
+  div.className = 'alert warn';
+  div.style.marginBottom = '10px';
+  div.innerHTML = '<span class="alert-ic">!</span>API: ' + msg;
+  el.prepend(div);
+  setTimeout(() => div.remove(), 8000);
+}
+// fetchAPI defined in API v3 block above
+// ── Fetch genérico v3 ──
+async function fetchAPI(source, from, to) {
+  const key = source+'_'+from+'_'+to;
+  if (dataCache[key]) return dataCache[key];
+  const url = API_URL + '?source=' + source + '&from=' + from + '&to=' + to;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    dataCache[key] = data;
+    apiStatus[source] = { ok: true, issues: data.issues || [] };
+    return data;
+  } catch(e) {
+    apiStatus[source] = { ok: false, error: e.message };
+    throw e;
+  }
+}
+
+// ── SA Ventas (Stripe) ──
+async function loadStripeSA(from, to) {
+  try {
+    const d = await fetchAPI('stripe_sa', from, to);
+    liveData.stripeSA = d;
+    const k = d.kpis;
+    const usd = n => n != null ? 'USD $'+Math.round(n).toLocaleString() : '—';
+    // KPIs principales
+    setEl('kpi-mrr',      usd(k.mrr));
+    setEl('kpi-newmrr',   usd(k.newMrr));
+    setEl('kpi-crec',     (k.crecimientoMRR >= 0 ? '+' : '') + k.crecimientoMRR + '%');
+    setEl('kpi-clientes', k.clientesActivos);
+    setEl('kpi-trials',   k.trialsTotal);
+    setEl('kpi-trials-basico', k.trialsBasico + ' Básico');
+    setEl('kpi-trials-pro',    k.trialsPro + ' Pro');
+    setEl('kpi-conv',     k.convTrial + '%');
+    setEl('kpi-nuevos',   k.clientesNuevos);
+    setEl('kpi-churn',    k.churnRate + '%');
+    setEl('kpi-retencion', k.retencion + '%');
+    // Planes
+    const pl = d.planes;
+    setEl('plan-bm-cnt', pl.basicoMensual.clientes); setEl('plan-bm-mrr', usd(pl.basicoMensual.mrr));
+    setEl('plan-ba-cnt', pl.basicoAnual.clientes);   setEl('plan-ba-mrr', usd(pl.basicoAnual.mrr));
+    setEl('plan-pm-cnt', pl.proMensual.clientes);    setEl('plan-pm-mrr', usd(pl.proMensual.mrr));
+    setEl('plan-pa-cnt', pl.proAnual.clientes);      setEl('plan-pa-mrr', usd(pl.proAnual.mrr));
+    // Movimientos
+    const mv = d.movimientos;
+    setEl('mov-renov-cnt',   mv.renovaciones);
+    setEl('mov-renov-pct',   mv.pctRenovaciones + '%');
+    setEl('mov-renov-mrr',   usd(mv.mrrRenovado));
+    setEl('mov-cancel-cnt',  mv.cancelaciones);
+    setEl('mov-cancel-pct',  mv.pctCancelaciones + '%');
+    setEl('mov-cancel-mrr',  '-' + usd(mv.mrrCancelado));
+    setEl('mov-reac-cnt',    mv.reactivaciones);
+    // Bridge MRR
+    const br = d.bridgeMRR;
+    setEl('bridge-inicio',  usd(br.inicio));
+    setEl('bridge-nuevo',   '+' + usd(br.masNuevo));
+    setEl('bridge-reac',    '+' + usd(br.masReactivaciones));
+    setEl('bridge-cancel',  '-' + usd(br.menosCancelaciones));
+    setEl('bridge-fin',     usd(br.fin));
+    // Chart
+    if (window.mrrChartInstance && k.mrr) {
+      const last = window.mrrChartInstance.data.datasets[0].data.length - 1;
+      window.mrrChartInstance.data.datasets[0].data[last] = k.mrr;
+      if (k.newMrr) window.mrrChartInstance.data.datasets[1].data[last] = k.newMrr;
+      window.mrrChartInstance.update();
+    }
+    updateNotifStatus('stripe-sa', true, d.issues);
+  } catch(e) {
+    updateNotifStatus('stripe-sa', false, [e.message]);
+    showAPIError('normal-stripe', e.message);
+  }
+}
+
+// ── SA Ventas data for Meta cross-calculations ──
+async function loadStripeSAForMeta(from, to) {
+  try {
+    const d = await fetchAPI('stripe_sa', from, to);
+    liveData.stripeSA = d;
+    const k = d.kpis;
+    // Trials para SA Marketing
+    const trials = k.trialsTotal || 0;
+    setEl('meta-kpi-trials',  trials);
+    setEl('meta-kpi-ventesp', trials > 0 ? Math.round(trials * (k.convTrial/100 || 0.68)) : '—');
+    setEl('meta-kpi-billesp', trials > 0 ? 'USD $' + Math.round(trials * (k.convTrial/100 || 0.68) * 40).toLocaleString() : '—');
+    // Tabla diaria — añadir columna trials desde Stripe si hay datos diarios
+    if (window.trialChartInstance) {
+      const last = window.trialChartInstance.data.datasets[0].data.length - 1;
+      window.trialChartInstance.data.datasets[0].data[last] = trials;
+      if (k.convTrial) window.trialChartInstance.data.datasets[1].data[last] = k.convTrial;
+      window.trialChartInstance.update();
+    }
+  } catch(e) { /* silencioso — stripe_sa ya manejó el error */ }
+}
+
+// ── SA Marketing (Meta campañas "SA") ──
+async function loadMetaSA(from, to) {
+  try {
+    const d = await fetchAPI('meta_sa', from, to);
+    liveData.metaSA = d;
+    const k = d.kpis;
+    const usd = n => n != null ? 'USD $'+parseFloat(n).toFixed(2) : '—';
+    setEl('meta-kpi-gasto',   'USD $' + k.gasto.toLocaleString());
+    setEl('meta-kpi-roas',    liveData.stripeSA ? (k.gasto > 0 ? (liveData.stripeSA.kpis.newMrr / k.gasto).toFixed(2)+'x' : '—') : '—');
+    setEl('meta-kpi-convweb', k.visitasPagina > 0 && liveData.stripeSA ? ((liveData.stripeSA.kpis.trialsTotal / k.visitasPagina)*100).toFixed(1)+'%' : '—');
+    setEl('meta-cpm',    usd(k.cpm));
+    setEl('meta-cpc',    usd(k.cpc));
+    setEl('meta-cpvisita', usd(k.cpVisita));
+    // cptrial se calcula con Stripe trials / gasto Meta
+    const trials = liveData.stripeSA?.kpis?.trialsTotal || 0;
+    const cpTrial = (trials > 0 && k.gasto > 0) ? (k.gasto / trials).toFixed(2) : '—';
+    setEl('meta-kpi-cptrial', cpTrial !== '—' ? 'USD $'+cpTrial : '—');
+    setEl('meta-cptrial2',    cpTrial !== '—' ? 'USD $'+cpTrial : '—');
+    // Tabla diaria desde Meta
+    if (d.diario && d.diario.length) renderMetaDailyTable(d.diario, trials);
+    updateNotifStatus('meta-sa', true, d.issues);
+  } catch(e) {
+    updateNotifStatus('meta-sa', false, [e.message]);
+    showAPIError('normal-meta', e.message);
+  }
+}
+
+function renderMetaDailyTable(diario, totalTrials) {
+  const tbody = document.getElementById('sa-meta-daily-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  let acum = 0;
+  // Distribuir trials proporcionalmente por día si no hay datos diarios de Stripe
+  const trialsPerDay = diario.length > 0 ? Math.round(totalTrials / diario.length) : 0;
+  diario.forEach(r => {
+    acum += r.gasto;
+    const dayTrials = trialsPerDay;
+    const cpTrial = dayTrials > 0 ? (r.gasto / dayTrials).toFixed(2) : '—';
+    const convPag = (r.visitas > 0 && dayTrials > 0) ? (dayTrials/r.visitas*100).toFixed(1) : '—';
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>'+r.fecha+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">$'+acum.toFixed(2)+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">$'+r.gasto+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">'+(r.impresiones||0).toLocaleString()+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">$'+r.cpm+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">'+(r.clics||0).toLocaleString()+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">$'+r.cpc+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">'+r.ctr+'%</td>'
+      +'<td class="aft-val" style="font-size:11px;">$'+r.cpVisita+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">'+dayTrials+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">'+(cpTrial!=='—'?'$'+cpTrial:'—')+'</td>'
+      +'<td class="aft-val" style="font-size:11px;">'+(convPag!=='—'?convPag+'%':'—')+'</td>';
+    tbody.appendChild(tr);
+  });
+}
+
+// ── ALMA Ventas (GHL + Stripe ALMA) ──
+async function loadGHLAlma(from, to) {
+  try {
+    const d = await fetchAPI('ghl_alma', from, to);
+    liveData.ghlALMA = d;
+    const k = d.kpis;
+    const usdGHL = n => n > 0 ? 'USD $'+Math.round(n).toLocaleString() : '—';
+    const usdS   = n => n > 0 ? '$'+Math.round(n).toLocaleString() : '—';
+
+    // KPIs resumen
+    setEl('alma-kpi-ventas',       usdGHL(k.ventasGHL));
+    setEl('alma-kpi-ticket',       usdGHL(k.ticketGHL));
+    setEl('alma-kpi-leads-total',  k.leadsTotal || '—');
+
+    // Pipeline por etapa
+    setEl('alma-kpi-pendiente-cnt',   k.leadsAsignados || 0);
+    setEl('alma-kpi-pendiente-monto', usdS(k.montoLeadsAsignados));
+    setEl('alma-kpi-llamadas',        k.llamadasConfirmadas || 0);
+    setEl('alma-kpi-llamadas-monto',  usdS(k.montoLlamadasConfirmadas));
+    setEl('alma-kpi-llamadas-delta',  k.pctConfirmacion != null ? k.pctConfirmacion + '% conf.' : '% conf.');
+    setEl('alma-kpi-decision-cnt',    k.enDecision || 0);
+    setEl('alma-kpi-decision-monto',  usdS(k.montoEnDecision));
+    setEl('alma-kpi-decision-dias',   k.diasEnDecision != null ? k.diasEnDecision + ' días promedio' : '— días promedio');
+    setEl('alma-kpi-pago-cnt',        k.pagoProgramado || 0);
+    setEl('alma-kpi-pago-monto',      usdS(k.montoPagoProgramado));
+    setEl('alma-kpi-clientes',        k.clientesNuevos);
+    setEl('alma-kpi-nocerrados',      k.noCerrados != null ? k.noCerrados : 0);
+    setEl('alma-kpi-conv',            k.convRate + '%');
+
+    // Alerta leads en "Pago Programado" sin tarea
+    const alertasPago = d.alertasPagoProgramado || [];
+    const alertaBox = document.getElementById('alma-alerta-pago-prog');
+    if (alertaBox) {
+      if (alertasPago.length > 0) {
+        alertaBox.style.display = 'block';
+        alertaBox.innerHTML = `<div class="alert warn" style="margin-bottom:8px;">
+          <span class="alert-ic">⚠</span>
+          <div>
+            <strong>${alertasPago.length} lead(s) en "Pago Programado" sin tarea abierta:</strong><br>
+            ${alertasPago.map(a => `<span style="color:var(--text1);">${a.nombre}</span> — <span style="color:var(--gold1);">${a.telefono}</span> — ${usdS(a.monto)}`).join('<br>')}
+          </div>
+        </div>`;
+      } else {
+        alertaBox.style.display = 'none';
+      }
+    }
+    // Actualizar embudo de ventas con datos reales
+    const funnelData = [
+      {id:0, val: k.citasAsistidas || '—', ok: (k.citasAsistidas||0) >= 10},
+      {id:1, val: k.pctAsistencia ? k.pctAsistencia+'%' : '—', ok: (k.pctAsistencia||0) >= 70},
+      {id:2, val: k.clientesNuevos || '—', ok: (k.clientesNuevos||0) >= 5},
+      {id:3, val: k.convEmbudo ? k.convEmbudo+'%' : '—', ok: (k.convEmbudo||0) >= 30},
+      {id:4, val: k.diasCierre ? k.diasCierre+' días' : '—', ok: (k.diasCierre||99) <= 3},
+      {id:5, val: k.agendaVenta ? k.agendaVenta+'%' : '—', ok: (k.agendaVenta||0) >= 25},
+      {id:6, val: k.ticketGHL ? 'USD $'+k.ticketGHL.toLocaleString() : '—', ok: true},
+    ];
+    const tbody = document.getElementById('alma-sales-funnel-body');
+    if (tbody) {
+      const rows = tbody.querySelectorAll('tr');
+      funnelData.forEach((fd, i) => {
+        if (rows[i]) {
+          const valCell = rows[i].querySelector('.aft-val');
+          const statusCell = rows[i].querySelector('.status-pill');
+          if (valCell) valCell.textContent = fd.val;
+          if (statusCell) {
+            statusCell.textContent = fd.val === '—' ? '—' : (fd.ok ? '✓ Bien' : '⚠ Revisar');
+            statusCell.className = 'status-pill ' + (fd.val === '—' ? 'sp-pending' : (fd.ok ? 'sp-ok' : 'sp-warn'));
+          }
+        }
+      });
+    }
+
+    // Closers rediseñados
+    const closers = Object.entries(d.closers || {});
+    if (closers.length) {
+      const cg = document.getElementById('closer-grid');
+      if (cg) {
+        cg.innerHTML = '';
+        closers.forEach(([name, c]) => {
+          const div = document.createElement('div');
+          div.className = 'closer-card';
+          div.style.cssText = 'background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:14px;';
+          const monto   = c.monto > 0 ? 'USD $'+c.monto.toLocaleString() : '$0';
+          const noCerr  = c.noCerrados || 0;
+          const total   = c.ganados + noCerr;
+          const conv    = total > 0 ? (c.ganados/total*100).toFixed(1)+'%' : '—';
+          const convColor = parseFloat(conv) >= 40 ? 'var(--green)' : parseFloat(conv) >= 25 ? 'var(--amber)' : 'var(--red)';
+          const leadsT  = c.leadsTotal || (c.porLlamar||0)+(c.confirmadas||0)+(c.enDecision||0)+(c.pagoProgramado||0)+c.ganados+noCerr;
+          div.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div style="font-size:12px;color:var(--gold1);font-weight:700;">👤 ${name}</div>
+              <div style="font-size:11px;color:${convColor};font-weight:700;">${conv} conv.</div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;">
+              <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px;">
+                <div style="font-size:16px;font-weight:600;color:var(--text1);">${leadsT}</div>
+                <div style="font-size:9px;color:var(--text3);">Leads</div>
+              </div>
+              <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px;">
+                <div style="font-size:16px;font-weight:600;color:var(--text1);">${c.porLlamar||c.leads||0}</div>
+                <div style="font-size:9px;color:var(--text3);">Por llamar</div>
+              </div>
+              <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px;">
+                <div style="font-size:16px;font-weight:600;color:var(--blue);">${c.confirmadas||0}</div>
+                <div style="font-size:9px;color:var(--text3);">Llamadas conf.</div>
+              </div>
+              <div style="text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px;">
+                <div style="font-size:16px;font-weight:600;color:var(--gold1);">${c.ganados||0}</div>
+                <div style="font-size:9px;color:var(--text3);">Ganados</div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border1);padding-top:8px;">
+              <div style="font-size:11px;color:var(--red);">${noCerr} no cerrados</div>
+              <div style="font-size:12px;font-weight:700;color:var(--green);">${monto}</div>
+            </div>`;
+          cg.appendChild(div);
+        });
+      }
+    }
+    updateNotifStatus('ghl', true, d.issues);
+    // Generar notificaciones IA con datos reales
+    renderAlmaAINotifs(k, d.closers || {});
+  } catch(e) {
+    updateNotifStatus('ghl', false, [e.message]);
+    showAPIError('normal-alma-sales', e.message);
+  }
+}
+
+// ── Notificaciones Inteligentes IA — Aceleradora ALMA ──
+async function renderAlmaAINotifs(kpis, closers) {
+  const oDiv = document.getElementById('alma-ai-oportunidades');
+  const aDiv = document.getElementById('alma-ai-alertas');
+  const rDiv = document.getElementById('alma-ai-recomendaciones');
+  if (!oDiv || !aDiv || !rDiv) return;
+  if (!kpis || (kpis.clientesNuevos === 0 && kpis.leadsAsignados === 0)) return;
+
+  // Mostrar spinner mientras carga
+  const spinner = '<div style="color:var(--text3);font-size:12px;padding:8px 0;display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:12px;height:12px;border:2px solid var(--gold2);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;"></span> Analizando datos con IA...</div>';
+  oDiv.innerHTML = spinner;
+  aDiv.innerHTML = spinner;
+  rDiv.innerHTML = spinner;
+
+  // Construir resumen de closers
+  const closerSummary = Object.entries(closers).map(([name, c]) =>
+    `${name}: ${c.leads}leads ${c.confirmadas}conf ${c.ganados}gan ${c.noCerrados}noc $${c.monto} ${c.convRate}%conv`
+  ).join(' | ');
+
+  // Llamar al Apps Script como proxy (evita CORS con Anthropic)
+  const params = new URLSearchParams({
+    source:        'ai_alma',
+    ventas:        kpis.ventasGHL        || 0,
+    ticket:        kpis.ticketGHL        || 0,
+    leads:         kpis.leadsAsignados   || 0,
+    llamadas:      kpis.llamadasConfirmadas || 0,
+    asistidas:     kpis.citasAsistidas   || 0,
+    pctAsistencia: kpis.pctAsistencia    || 0,
+    clientes:      kpis.clientesNuevos   || 0,
+    convRate:      kpis.convRate         || 0,
+    convEmbudo:    kpis.convEmbudo       || 0,
+    diasCierre:    kpis.diasCierre       || 0,
+    agendaVenta:   kpis.agendaVenta      || 0,
+    closers:       closerSummary
+  });
+
+  try {
+    const res  = await fetch(API_URL + '?' + params.toString());
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    // Renderizar oportunidades
+    oDiv.innerHTML = (data.oportunidades || []).length > 0
+      ? data.oportunidades.map(o =>
+          `<div class="mejora-item">
+            <span class="mejora-badge mb-medio" style="background:rgba(74,144,217,.15);color:#4A90D9;border-color:rgba(74,144,217,.3);">Oportunidad</span>
+            <div class="mejora-body">
+              <div class="mejora-kpi">${o.titulo}</div>
+              <div class="mejora-desc">${o.descripcion}</div>
+              ${o.impacto ? '<div class="mejora-impacto">→ '+o.impacto+'</div>' : ''}
+            </div>
+          </div>`
+        ).join('')
+      : '<div style="color:#7ABE8A;font-size:12px;padding:8px 0;">✦ Sin oportunidades pendientes — métricas en buen estado.</div>';
+
+    // Renderizar alertas
+    aDiv.innerHTML = (data.alertas || []).length > 0
+      ? data.alertas.map(a =>
+          `<div class="mejora-item">
+            <span class="mejora-badge ${a.nivel==='Alto'?'mb-alto':'mb-medio'}">${a.nivel}</span>
+            <div class="mejora-body">
+              <div class="mejora-kpi">${a.titulo}</div>
+              <div class="mejora-desc">${a.descripcion}</div>
+            </div>
+          </div>`
+        ).join('')
+      : '<div style="color:#7ABE8A;font-size:12px;padding:8px 0;">✦ Sin alertas críticas.</div>';
+
+    // Renderizar recomendaciones
+    rDiv.innerHTML = (data.recomendaciones || []).length > 0
+      ? data.recomendaciones.map((r, i) =>
+          `<div class="mejora-item">
+            <span class="mejora-badge" style="background:rgba(90,158,111,.12);color:#7ABE8A;border:1px solid rgba(90,158,111,.3);min-width:24px;text-align:center;">${i+1}</span>
+            <div class="mejora-body">
+              <div class="mejora-kpi">${r.accion} <span style="font-size:9px;color:var(--amber);margin-left:6px;">${r.plazo}</span></div>
+              <div class="mejora-desc">${r.descripcion}</div>
+            </div>
+          </div>`
+        ).join('')
+      : '<div style="color:var(--text3);font-size:12px;padding:8px 0;">Sin recomendaciones disponibles.</div>';
+
+  } catch(e) {
+    // Fallback a análisis estático completo en las 3 secciones
+    const k = kpis;
+
+    // OPORTUNIDADES
+    const opps = [];
+    if ((k.pctAsistencia||0) < 75) opps.push({titulo:'Asistencia por debajo del benchmark ('+k.pctAsistencia+'% — objetivo >75%)', desc:'Implementar recordatorios WhatsApp 24h y 1h antes de cada llamada. Cada +5pts de asistencia = +'+Math.round((k.citasConfirmadas||0)*0.05)+' asistencias adicionales.', impacto:'Potencial: +'+ Math.round((k.citasConfirmadas||0)*0.05) +' asistencias/mes'});
+    if ((k.convRate||0) < 35)      opps.push({titulo:'Conversión por debajo del objetivo ('+k.convRate+'% — objetivo >35%)', desc:'Revisar el script de ventas y hacer roleplay semanal con el equipo. Con '+k.llamadasConfirmadas+' llamadas activas, cada +5pts equivale a '+Math.round((k.llamadasConfirmadas||0)*0.05)+' clientes adicionales.', impacto:'Potencial: +$'+Math.round((k.llamadasConfirmadas||0)*0.05*(k.ticketGHL||0)).toLocaleString()+' USD/mes'});
+    if ((k.agendaVenta||0) < 30)   opps.push({titulo:'Ratio agenda→venta bajo ('+k.agendaVenta+'% — objetivo >30%)', desc:'Mejorar la calificación de leads antes de agendar. Un lead mejor calificado convierte más. Revisar el proceso de asignación.', impacto:'Subir al 30% generaría '+ Math.round((k.leadsAsignados||0)*0.3-k.clientesNuevos) +' clientes adicionales con los leads actuales'});
+    if (opps.length === 0) opps.push({titulo:'Métricas dentro del objetivo', desc:'Todos los indicadores principales están en rango saludable. Enfocarse en escalar el volumen de leads para crecer proporcionalmente.', impacto:'Mantener ritmo actual y aumentar leads asignados'});
+    oDiv.innerHTML = opps.map(o =>
+      `<div class="mejora-item">
+        <span class="mejora-badge mb-medio" style="background:rgba(74,144,217,.15);color:#4A90D9;border-color:rgba(74,144,217,.3);">Oportunidad</span>
+        <div class="mejora-body">
+          <div class="mejora-kpi">${o.titulo}</div>
+          <div class="mejora-desc">${o.desc}</div>
+          <div class="mejora-impacto">→ ${o.impacto}</div>
+        </div>
+      </div>`
+    ).join('');
+
+    // ALERTAS
+    const alerts = [];
+    if ((k.pctAsistencia||0) > 0 && (k.pctAsistencia||0) < 60) alerts.push({nivel:'Alto', titulo:'Asistencia crítica ('+k.pctAsistencia+'%)', desc:'Menos de 6 de cada 10 citas confirmadas asisten. Esto genera un cuello de botella severo en el embudo. Prioridad inmediata: implementar confirmación manual el día anterior.'});
+    if ((k.convRate||0) > 0 && (k.convRate||0) < 25)             alerts.push({nivel:'Alto', titulo:'Conversión crítica ('+k.convRate+'%)', desc:'Solo 1 de cada 4 llamadas cierra. Por debajo del mínimo viable para un programa de alto ticket. Evaluar el script, la oferta y la calidad de los leads.'});
+    if ((k.diasCierre||0) > 7)                                    alerts.push({nivel:'Medio', titulo:'Ciclo de cierre muy largo ('+k.diasCierre+' días)', desc:'Un cierre que tarda más de 7 días tiene baja probabilidad de concretarse. Implementar seguimiento urgente en las primeras 48h post-llamada.'});
+    if (alerts.length === 0) {
+      aDiv.innerHTML = '<div style="color:#7ABE8A;font-size:12px;padding:8px 0;">✦ Sin alertas críticas — métricas dentro de rango aceptable.</div>';
+    } else {
+      aDiv.innerHTML = alerts.map(a =>
+        `<div class="mejora-item">
+          <span class="mejora-badge ${a.nivel==='Alto'?'mb-alto':'mb-medio'}">${a.nivel}</span>
+          <div class="mejora-body">
+            <div class="mejora-kpi">${a.titulo}</div>
+            <div class="mejora-desc">${a.desc}</div>
+          </div>
+        </div>`
+      ).join('');
+    }
+
+    // RECOMENDACIONES
+    const recs = [];
+    if ((k.pctAsistencia||0) < 75) recs.push({accion:'Activar secuencia de recordatorios', plazo:'Esta semana', desc:'Configurar en GHL: mensaje WhatsApp automático 24h antes ("¿Confirmas tu llamada mañana a las X?") y otro 1h antes. Responsable: operaciones.'});
+    if ((k.convRate||0) < 35)      recs.push({accion:'Revisión de script de ventas', plazo:'Este mes', desc:'Hacer roleplay de 30 min con cada closer usando los últimos 3 casos "No Cerrados". Identificar el punto exacto donde se pierde la venta. Responsable: líder de ventas.'});
+    recs.push({accion:'Aumentar volumen de leads calificados', plazo:'30 días', desc:'Con ticket de $'+( k.ticketGHL||0).toLocaleString()+' USD, cada lead adicional bien calificado vale ~$'+(Math.round((k.ticketGHL||0)*(k.convRate||0)/100)).toLocaleString()+' USD en expectativa de ingreso. Revisar fuentes de leads con mejor conversión.'});
+    rDiv.innerHTML = recs.map((r, i) =>
+      `<div class="mejora-item">
+        <span class="mejora-badge" style="background:rgba(90,158,111,.12);color:#7ABE8A;border:1px solid rgba(90,158,111,.3);min-width:24px;text-align:center;">${i+1}</span>
+        <div class="mejora-body">
+          <div class="mejora-kpi">${r.accion} <span style="font-size:9px;color:var(--amber);margin-left:6px;">${r.plazo}</span></div>
+          <div class="mejora-desc">${r.desc}</div>
+        </div>
+      </div>`
+    ).join('');
+  }
+}
+
+// ── Notificaciones IA Marketing ALMA ──
+async function renderAlmaMktAINotifs(ghlKpis, metaKpis) {
+  const oDiv = document.getElementById('alma-mkt-ai-oportunidades');
+  const aDiv = document.getElementById('alma-mkt-ai-alertas');
+  const rDiv = document.getElementById('alma-mkt-ai-recomendaciones');
+  if (!oDiv || !aDiv || !rDiv) return;
+
+  const spinner = '<div style="color:var(--text3);font-size:12px;padding:8px 0;display:flex;align-items:center;gap:8px;"><span style="display:inline-block;width:12px;height:12px;border:2px solid var(--gold2);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;"></span> Analizando datos con IA...</div>';
+  oDiv.innerHTML = spinner; aDiv.innerHTML = spinner; rDiv.innerHTML = spinner;
+
+  const gasto      = metaKpis.gasto       || 0;
+  const ventas     = ghlKpis.ventasGHL    || 0;
+  const clientes   = ghlKpis.clientesNuevos || 0;
+  const leads      = ghlKpis.leadsAsignados || 0;
+  const agendas    = ghlKpis.agendas      || 0;
+  const pctCalif   = ghlKpis.pctCalif     || 0;
+  const ticket     = ghlKpis.ticketGHL    || 0;
+  const roi        = gasto > 0 && ventas > 0 ? (ventas/gasto).toFixed(1) : 0;
+  const cac        = clientes > 0 && gasto > 0 ? Math.round(gasto/clientes) : 0;
+  const cpl        = leads > 0 && gasto > 0 ? (gasto/leads).toFixed(2) : 0;
+
+  const params = new URLSearchParams({
+    source:   'ai_alma',
+    ventas, ticket, leads, agendas, pctAsistencia: ghlKpis.pctAsistencia||0,
+    clientes, convRate: ghlKpis.convRate||0, convEmbudo: ghlKpis.convEmbudo||0,
+    diasCierre: ghlKpis.diasCierre||0, agendaVenta: ghlKpis.agendaVenta||0,
+    // Datos extra de marketing
+    closers: `Gasto Meta: $${gasto} | ROI: ${roi}x | CAC: $${cac} | CPL: $${cpl} | Agendas: ${agendas} | % Calificados: ${pctCalif}%`
+  });
+
+  const renderBlocks = (data) => {
+    oDiv.innerHTML = (data.oportunidades||[]).length > 0
+      ? data.oportunidades.map(o => `<div class="mejora-item"><span class="mejora-badge mb-medio" style="background:rgba(74,144,217,.15);color:#4A90D9;border-color:rgba(74,144,217,.3);">Oportunidad</span><div class="mejora-body"><div class="mejora-kpi">${o.titulo}</div><div class="mejora-desc">${o.descripcion}</div>${o.impacto?'<div class="mejora-impacto">→ '+o.impacto+'</div>':''}</div></div>`).join('')
+      : '<div style="color:#7ABE8A;font-size:12px;padding:8px 0;">✦ Sin oportunidades pendientes.</div>';
+
+    aDiv.innerHTML = (data.alertas||[]).length > 0
+      ? data.alertas.map(a => `<div class="mejora-item"><span class="mejora-badge ${a.nivel==='Alto'?'mb-alto':'mb-medio'}">${a.nivel}</span><div class="mejora-body"><div class="mejora-kpi">${a.titulo}</div><div class="mejora-desc">${a.descripcion}</div></div></div>`).join('')
+      : '<div style="color:#7ABE8A;font-size:12px;padding:8px 0;">✦ Sin alertas críticas.</div>';
+
+    rDiv.innerHTML = (data.recomendaciones||[]).length > 0
+      ? data.recomendaciones.map((r,i) => `<div class="mejora-item"><span class="mejora-badge" style="background:rgba(90,158,111,.12);color:#7ABE8A;border:1px solid rgba(90,158,111,.3);min-width:24px;text-align:center;">${i+1}</span><div class="mejora-body"><div class="mejora-kpi">${r.accion} <span style="font-size:9px;color:var(--amber);margin-left:6px;">${r.plazo}</span></div><div class="mejora-desc">${r.descripcion}</div></div></div>`).join('')
+      : '<div style="color:var(--text3);font-size:12px;padding:8px 0;">Sin recomendaciones disponibles.</div>';
+  };
+
+  try {
+    const res  = await fetch(API_URL + '?' + params.toString());
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    renderBlocks(data);
+  } catch(e) {
+    // Fallback estático para marketing
+    const opps = [], alts = [], recs = [];
+    if (roi > 0 && roi < 3)  opps.push({titulo:`ROI por debajo del objetivo (${roi}x — objetivo >5x)`, desc:`Con $${gasto} invertidos y $${ventas} en ventas, cada $1 retorna $${roi}. Optimizar creativos y targeting para mejorar la calidad del lead antes de escalar presupuesto.`, impacto:`Alcanzar 5x ROI generaría $${(gasto*5).toLocaleString()} en ventas con el mismo gasto`});
+    if (cac > 0 && ticket > 0 && (ticket/cac) < 5) opps.push({titulo:`Ratio CAC/Ticket mejorable (${(ticket/cac).toFixed(1)}x — objetivo >5x)`, desc:`Con CAC $${cac} y ticket $${ticket}, la relación es ${(ticket/cac).toFixed(1)}x. Reducir CAC o aumentar ticket para mejorar la rentabilidad del canal.`, impacto:`Reducir CAC a $${Math.round(ticket/5).toLocaleString()} alcanzaría el ratio 5x objetivo`});
+    if (opps.length === 0) opps.push({titulo:'Canal en rango saludable', desc:'Los indicadores principales de marketing están dentro del rango esperado. Enfocarse en escalar lo que funciona.', impacto:'Mantener ritmo y aumentar presupuesto gradualmente'});
+    if (gasto === 0) alts.push({nivel:'Alto', titulo:'Sin pauta activa este periodo', desc:'No se detectó gasto en Meta Ads con campañas "ALMA". Para activar el embudo de marketing, lanzar campaña incluyendo "ALMA" en el nombre.'});
+    recs.push({accion:'Lanzar pauta con "ALMA" en el nombre', plazo:'Esta semana', desc:'Crear campaña en Meta Ads incluyendo "ALMA" en el nombre. Esto activa automáticamente el tracking en este dashboard.'});
+    recs.push({accion:'Revisar ratio CAC vs Ticket', plazo:'Este mes', desc:`Con ticket promedio $${ticket.toLocaleString()}, el CAC máximo rentable es $${Math.round(ticket/5).toLocaleString()} (ratio 5x). Ajustar la inversión según este umbral.`});
+    renderBlocks({ oportunidades: opps, alertas: alts, recomendaciones: recs });
+  }
+}
+
+async function loadStripeALMA(from, to) {
+  try {
+    const d = await fetchAPI('stripe_alma', from, to);
+    liveData.stripeALMA = d;
+    const k = d.kpis;
+    const usd = n => n != null ? 'USD $'+Math.round(n).toLocaleString() : '—';
+    // Ventas y ticket promedio se calculan desde GHL (loadGHLAlma)
+    // Stripe ALMA solo se usa para cruzar con Meta cuando haya productos ALMA
+    // Si hay datos de GHL también actualizamos ganancia
+    if (liveData.metaALMA) {
+      const ganancia = k.ventasTotales - (liveData.metaALMA.kpis?.gasto || 0);
+      const roi = liveData.metaALMA.kpis?.gasto > 0
+        ? Math.round(k.ventasTotales / liveData.metaALMA.kpis.gasto * 100) : 0;
+      setEl('alma-mkt-ganancia', usd(ganancia));
+      setEl('alma-mkt-roi',      roi + '%');
+    }
+    updateNotifStatus('stripe-alma', true, d.issues);
+  } catch(e) {
+    updateNotifStatus('stripe-alma', false, [e.message]);
+  }
+}
+
+// ── ALMA Marketing (Meta "ALMA" + GHL + Stripe ALMA) ──
+async function loadMetaALMA(from, to) {
+  try {
+    const d = await fetchAPI('meta_alma', from, to);
+    liveData.metaALMA = d;
+    const k = d.kpis;
+    const usd = n => n != null ? 'USD $'+parseFloat(n).toFixed(2) : '—';
+    setEl('alma-meta-gasto',    'USD $'+(k.gasto||0).toLocaleString());
+    setEl('alma-meta-imp',      (k.impresiones||0).toLocaleString());
+    setEl('alma-meta-alcance',  (k.alcance||0).toLocaleString());
+    setEl('alma-meta-cpm',      usd(k.cpm));
+    setEl('alma-meta-freq',     (k.freq||0)+'x');
+    setEl('alma-meta-clics',    (k.clics||0).toLocaleString());
+    setEl('alma-meta-cpc',      usd(k.cpc));
+    setEl('alma-meta-ctr',      (k.ctr||0)+'%');
+    setEl('alma-meta-visitas',  (k.visitasPagina||0).toLocaleString());
+    setEl('alma-meta-cpvisita', usd(k.cpVisita));
+    updateNotifStatus('meta-alma', true, d.issues);
+  } catch(e) {
+    updateNotifStatus('meta-alma', false, [e.message]);
+  }
+}
+
+async function loadGHLAlmaForMkt(from, to) {
+  if (!liveData.ghlALMA) await loadGHLAlma(from, to);
+  const ghl    = liveData.ghlALMA;
+  const meta   = liveData.metaALMA;
+  const stripe = liveData.stripeALMA;
+  if (!ghl) return;
+  const k   = ghl.kpis;
+  const usd = n => n != null ? 'USD $'+Math.round(n).toLocaleString() : '—';
+  const gasto = meta?.kpis?.gasto || 0;
+
+  // KPIs card superiores
+  setEl('alma-mkt-clientes', k.clientesNuevos);
+  const cac = (k.clientesNuevos > 0 && gasto > 0) ? Math.round(gasto / k.clientesNuevos) : 0;
+  setEl('alma-mkt-cac', cac > 0 ? 'USD $'+cac.toLocaleString() : '—');
+  setEl('alma-meta-leads',    k.leadsAsignados);
+  const cpl = (k.leadsAsignados > 0 && gasto > 0) ? (gasto/k.leadsAsignados).toFixed(2) : '—';
+  setEl('alma-meta-cpl',      cpl !== '—' ? 'USD $'+cpl : '—');
+  const convPag = (k.visitasPagina > 0 && k.leadsAsignados > 0) ? ((k.leadsAsignados/k.visitasPagina)*100).toFixed(1)+'%' : '—';
+  setEl('alma-meta-convpag',  convPag !== '—' ? convPag : '—');
+  setEl('alma-meta-agendas',  k.agendas);
+  const cpCita = (k.agendas > 0 && gasto > 0) ? (gasto/k.agendas).toFixed(2) : '—';
+  setEl('alma-meta-cpcita',   cpCita !== '—' ? 'USD $'+cpCita : '—');
+  setEl('alma-meta-pctcalif', k.pctCalif + '%');
+
+  // Ventas Generadas = desde el pipeline GHL (oportunidades ganadas)
+  const ventasGHL = k.ventasGHL || 0;
+  setEl('alma-mkt-ventas',   ventasGHL > 0 ? 'USD $'+ventasGHL.toLocaleString() : '—');
+  const ganancia = ventasGHL - gasto;
+  setEl('alma-mkt-ganancia', ventasGHL > 0 ? 'USD $'+Math.max(0, ganancia).toLocaleString() : '—');
+  const roi = (gasto > 0 && ventasGHL > 0) ? (ventasGHL/gasto).toFixed(1)+'x' : '—';
+  setEl('alma-mkt-roi', roi);
+
+  // Renderizar embudo visual con datos reales
+  renderAlmaMktFunnel({
+    meta:   liveData.metaALMA,
+    ghl:    liveData.ghlALMA,
+    stripe: liveData.stripeALMA
+  });
+
+  // Notificaciones IA Marketing ALMA
+  renderAlmaMktAINotifs(k, meta?.kpis || {});
+}
+
+// ── Notificaciones ──
+async function loadAllForNotifications(from, to) {
+  // Cargar todas las fuentes y generar notificaciones
+  const sources = [
+    { key: 'stripe_sa',   fn: () => fetchAPI('stripe_sa', from, to) },
+    { key: 'stripe_alma', fn: () => fetchAPI('stripe_alma', from, to) },
+    { key: 'meta_sa',     fn: () => fetchAPI('meta_sa', from, to) },
+    { key: 'meta_alma',   fn: () => fetchAPI('meta_alma', from, to) },
+    { key: 'ghl_alma',    fn: () => fetchAPI('ghl_alma', from, to) },
+  ];
+  const results = {};
+  for (const s of sources) {
+    try { results[s.key] = await s.fn(); }
+    catch(e) { results[s.key] = { error: e.message }; }
+  }
+  renderNotifications(results);
+}
+
+function renderNotifications(results) {
+  // Estado conexiones
+  const statusMap = {
+    'stripe-sa':   { key: 'stripe_sa',   label: 'Stripe SA' },
+    'stripe-alma': { key: 'stripe_alma', label: 'Stripe ALMA' },
+    'meta-sa':     { key: 'meta_sa',     label: 'Meta SA' },
+    'meta-alma':   { key: 'meta_alma',   label: 'Meta ALMA' },
+    'ghl':         { key: 'ghl_alma',    label: 'GHL ALMA' },
+  };
+  Object.entries(statusMap).forEach(([id, cfg]) => {
+    const r = results[cfg.key];
+    const ok = r && !r.error;
+    const issues = r?.issues || [];
+    updateNotifStatus(id, ok, issues);
+  });
+
+  // Notificaciones ALMA
+  const ghl = results['ghl_alma'];
+  const stripeAlma = results['stripe_alma'];
+  const metaAlma = results['meta_alma'];
+  let almaNotifs = [];
+  if (ghl && !ghl.error && ghl.kpis) {
+    const k = ghl.kpis;
+    if (k.convRate < 30) almaNotifs.push({p:'Alto', t:'Tasa de conversión baja ('+k.convRate+'%)', d:'Menos de 3 de cada 10 llamadas confirmadas se convierten en venta. Revisar el script de ventas y hacer roleplay semanal con el equipo de closers. Objetivo: >40%.'});
+    if (k.pctAsistencia < 70) almaNotifs.push({p:'Alto', t:'Tasa de asistencia baja ('+k.pctAsistencia+'%)', d:'Menos del 70% de las citas confirmadas asisten. Implementar secuencia de recordatorios por WhatsApp 24h y 1h antes de la llamada.'});
+    if (k.leadsAsignados === 0) almaNotifs.push({p:'Info', t:'Sin leads en el pipeline este periodo', d:'No hay leads en la etapa "Pendiente por llamar / Asignado". Verificar que el pipeline esté activo y que los leads nuevos se estén asignando correctamente.'});
+  }
+  if (metaAlma && !metaAlma.error && metaAlma.kpis?.gasto === 0) {
+    almaNotifs.push({p:'Info', t:'Sin pauta activa en Meta ALMA', d:'No se encontraron campañas con "ALMA" en el nombre este periodo. Cuando lances pauta, asegúrate de incluir la palabra "ALMA" en el nombre de la campaña.'});
+  }
+  if (almaNotifs.length === 0) almaNotifs.push({p:'OK', t:'Todo en orden', d:'No hay alertas críticas para Aceleradora ALMA en este periodo.'});
+  renderNotifBox('notif-alma', almaNotifs);
+
+  // Notificaciones SA
+  const stripeSA = results['stripe_sa'];
+  const metaSA = results['meta_sa'];
+  let saNotifs = [];
+  if (stripeSA && !stripeSA.error && stripeSA.kpis) {
+    const k = stripeSA.kpis;
+    if (k.churnRate > 3) saNotifs.push({p:'Alto', t:'Churn rate alto ('+k.churnRate+'% — objetivo <3%)', d:'La tasa de cancelación supera el objetivo. Implementar encuesta de salida automática + revisar el onboarding de la semana 1. Cada punto de churn representa ~USD $'+Math.round(k.mrr*0.01).toLocaleString()+'/mes en MRR perdido.'});
+    if (k.convTrial < 50) saNotifs.push({p:'Medio', t:'Conversión de trial baja ('+k.convTrial+'%)', d:'Menos de la mitad de los trials se convierten en suscripción. Revisar la experiencia de los primeros 7 días y agregar más puntos de contacto durante el trial.'});
+    if (k.retencion < 95) saNotifs.push({p:'Medio', t:'Retención por debajo del 95% ('+k.retencion+'%)', d:'Implementar programa de retención proactivo: correo en día 20 del ciclo ofreciendo soporte personalizado antes del siguiente cobro.'});
+  }
+  if (metaSA && !metaSA.error && metaSA.kpis?.gasto === 0) {
+    saNotifs.push({p:'Info', t:'Sin pauta activa en Meta SA', d:'No se encontraron campañas con "SA" en el nombre este periodo. Cuando lances pauta, incluye "SA" en el nombre de la campaña.'});
+  }
+  if (saNotifs.length === 0) saNotifs.push({p:'OK', t:'Todo en orden', d:'No hay alertas críticas para Spiritual Academy en este periodo.'});
+  renderNotifBox('notif-sa', saNotifs);
+
+  // Notificaciones Finanzas
+  let finNotifs = [];
+  if (stripeSA?.kpis && stripeAlma?.kpis) {
+    const totalIngresos = (stripeSA.kpis.mrr || 0) + (stripeAlma.kpis.ventasTotales || 0);
+    const totalGasto = (metaSA?.kpis?.gasto || 0) + (metaAlma?.kpis?.gasto || 0);
+    if (totalGasto > totalIngresos * 0.3) finNotifs.push({p:'Alto', t:'Gasto publicitario supera el 30% de ingresos', d:'La inversión en pauta representa más del 30% de los ingresos totales. Revisar eficiencia de campañas y optimizar ROAS antes de escalar presupuesto.'});
+  }
+  if (finNotifs.length === 0) finNotifs.push({p:'OK', t:'Indicadores financieros estables', d:'No hay alertas críticas de finanzas en este periodo. Revisa la sección Finanzas para el análisis completo.'});
+  renderNotifBox('notif-fin', finNotifs);
+}
+
+function renderNotifBox(containerId, notifs) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = notifs.map(n => {
+    const colors = {
+      'Alto':  { badge:'mb-alto', ic:'!' },
+      'Medio': { badge:'mb-medio', ic:'◈' },
+      'Info':  { badge:'mb-medio', ic:'◈' },
+      'OK':    { badge:'', ic:'✦', style:'background:rgba(90,158,111,.1);border-color:rgba(90,158,111,.3);color:#7ABE8A;' }
+    };
+    const c = colors[n.p] || colors['Info'];
+    return '<div class="mejora-item">'
+      + (n.p !== 'OK' ? '<span class="mejora-badge '+c.badge+'">'+n.p+'</span>' : '')
+      + '<div class="mejora-body">'
+      + '<div class="mejora-kpi">'+n.t+'</div>'
+      + '<div class="mejora-desc">'+n.d+'</div>'
+      + '</div></div>';
+  }).join('');
+}
+
+function updateNotifStatus(id, ok, issues) {
+  const dot = document.getElementById('status-dot-'+id);
+  const txt = document.getElementById('status-txt-'+id);
+  if (dot) dot.style.background = ok ? 'var(--green)' : 'var(--red)';
+  if (txt) {
+    if (!ok) { txt.textContent = '❌ Error de conexión'; txt.style.color = 'var(--red)'; }
+    else if (issues && issues.length > 0) { txt.textContent = '⚠ '+issues[0].substring(0,60); txt.style.color = 'var(--amber)'; }
+    else { txt.textContent = '✓ Conectado'; txt.style.color = 'var(--green)'; }
+  }
+}
+
+// ── Helper setEl ──
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el && val !== null && val !== undefined) el.textContent = val;
+}
+
+function showAPIError(containerId, msg) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  // Solo mostrar si no hay ya un error
+  if (el.querySelector('.api-error')) return;
+  const div = document.createElement('div');
+  div.className = 'alert warn api-error';
+  div.style.marginBottom = '10px';
+  div.innerHTML = '<span class="alert-ic">!</span>API: ' + msg;
+  el.prepend(div);
+  setTimeout(() => div.remove(), 8000);
+}
+
+function triggerLoad(tab) {
+  const {from, to} = getDateRange(tab);
+  if (tab==='stripe')     { loadStripeSA(from, to); }
+  if (tab==='meta')       { loadMetaSA(from, to); loadStripeSAForMeta(from, to); }
+  if (tab==='alma-sales') { loadGHLAlma(from, to); loadStripeALMA(from, to); }
+  if (tab==='alma-mkt')   { loadMetaALMA(from, to); loadGHLAlmaForMkt(from, to); loadStripeALMA(from, to); }
+  if (tab==='notif')      { loadAllForNotifications(from, to); }
+}
+
+const gc='rgba(201,148,26,.1)',tc='#8A7245';
+
+/* ── ROUTING ── */
+function switchBiz(biz){
+  document.querySelectorAll('.biz-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.biz-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('biz-'+biz).classList.add('active');
+  document.getElementById('btn-'+biz).classList.add('active');
+  // Al entrar a Notificaciones, cargar datos
+  if (biz === 'notif') {
+    const now = new Date();
+    const y = now.getFullYear(), m = String(now.getMonth()+1).padStart(2,'0'), d = String(now.getDate()).padStart(2,'0');
+    const from = y+'-'+m+'-01', to = y+'-'+m+'-'+d;
+    loadAllForNotifications(from, to).then(() => {
+      const ldg = document.getElementById('notif-loading');
+      if (ldg) ldg.style.display = 'none';
+    });
+  }
+}
+function switchTab(biz,name,el){
+  const c=document.getElementById('biz-'+biz);
+  c.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  c.querySelectorAll('.pane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(biz+'-pane-'+name).classList.add('active');
+}
+function switchSubTab(biz,name,el){
+  const c=document.getElementById('biz-'+biz);
+  c.querySelectorAll('.subtab').forEach(t=>t.classList.remove('active'));
+  c.querySelectorAll('.subpane').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(biz+'-'+name).classList.add('active');
+}
+
+/* ── DATE HELPERS ── */
+function setToday(tab,btn){
+  const now=new Date();
+  const y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0'), d=String(now.getDate()).padStart(2,'0');
+  const today=`${y}-${m}-${d}`;
+  const fromEl=document.getElementById('dFrom-'+tab);
+  const toEl=document.getElementById('dTo-'+tab);
+  if(fromEl) fromEl.value=today;
+  if(toEl) toEl.value=today;
+  btn.closest('.datebar').querySelectorAll('.dbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const esBtn=document.getElementById('dbtn-este-'+tab);
+  if(esBtn) esBtn.classList.remove('sel');
+  triggerLoad(tab);
+}
+function setThisMonth(tab,btn){
+  const now=new Date();
+  const y=now.getFullYear(), m=String(now.getMonth()+1).padStart(2,'0');
+  const lastDay=new Date(y,now.getMonth()+1,0).getDate();
+  const fromEl=document.getElementById('dFrom-'+tab);
+  const toEl=document.getElementById('dTo-'+tab);
+  if(fromEl) fromEl.value=`${y}-${m}-01`;
+  if(toEl) toEl.value=`${y}-${m}-${String(lastDay).padStart(2,'0')}`;
+  btn.closest('.datebar').querySelectorAll('.dbtn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const label=`${months[now.getMonth()]} ${y}`;
+  if(tab==='fin'){const lbl=document.getElementById('fin-periodo-title');if(lbl)lbl.textContent=`📊 Estado Financiero Puntual — ${label}`;}
+  if(tab==='meta'){const lbl=document.getElementById('meta-daily-title');if(lbl)lbl.textContent=`Movimiento Diario de la Pauta — ${label}`;}
+  triggerLoad(tab);
+}
+function applyRange(tab){
+  const from=document.getElementById('dFrom-'+tab)?.value||'';
+  const to=document.getElementById('dTo-'+tab)?.value||'';
+  const btn=document.querySelector(`#dbtn-este-${tab}`);
+  if(btn) btn.classList.remove('sel');
+  const wrap=document.querySelector(`#dFrom-${tab}`)?.closest('.date-range-wrap');
+  if(wrap){ wrap.style.borderColor='var(--gold1)'; setTimeout(()=>{ wrap.style.borderColor=''; },1500); }
+  triggerLoad(tab);
+  // Update dynamic period labels
+  if(tab==='fin'){
+    const lbl=document.getElementById('fin-periodo-title');
+    if(lbl) lbl.textContent=`📊 Estado Financiero Puntual — ${fmtDate(from)} al ${fmtDate(to)}`;
+  }
+  if(tab==='meta'){
+    const lbl=document.getElementById('meta-daily-title');
+    if(lbl) lbl.textContent=`Movimiento Diario de la Pauta — ${fmtDate(from)} al ${fmtDate(to)}`;
+  }
+}
+function fmtDate(d){
+  if(!d) return '—';
+  const [y,m,day]=d.split('-');
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return `${parseInt(day)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+/* ── COMPARE TOGGLE ── */
+function toggleCmp(tab){
+  const btn=document.getElementById('cmpbtn-'+tab);
+  const panel=document.getElementById('cmppanel-'+tab);
+  const isOn=btn.classList.toggle('on');
+  panel.classList.toggle('open',isOn);
+  btn.textContent=isOn?'✕ Cerrar':'Comparar VS';
+  const normalEl=document.getElementById('normal-'+tab);
+  const cmpEl=document.getElementById('cmpview-'+tab);
+  if(normalEl) normalEl.style.display=isOn?'none':'block';
+  if(cmpEl) cmpEl.style.display=isOn?'block':'none';
+}
+
+/* ── STRIPE COMPARE ── */
+const stripeMonthlyData={
+  'Abr 2026':{mrr:18450,newMrr:2340,crec:1820,clientes:312,trial:87,conv:68,nuevos:59,churn:4.2,ltv:890,renov:253,cancel:13,reac:8,upgr:19,downg:7,mrrIni:16630},
+  'Mar 2026':{mrr:16630,newMrr:2100,crec:430,clientes:301,trial:84,conv:65,nuevos:55,churn:4.0,ltv:870,renov:248,cancel:12,reac:7,upgr:18,downg:6,mrrIni:15400},
+  'Feb 2026':{mrr:16200,newMrr:1600,crec:800,clientes:290,trial:81,conv:66,nuevos:53,churn:4.2,ltv:850,renov:237,cancel:11,reac:7,upgr:17,downg:5,mrrIni:14800},
+  'Ene 2026':{mrr:15400,newMrr:1800,crec:1300,clientes:278,trial:76,conv:65,nuevos:49,churn:4.3,ltv:820,renov:229,cancel:12,reac:6,upgr:15,downg:5,mrrIni:13900},
+};
+function getStripeData(from){
+  const m=new Date(from+'T12:00:00').getMonth();
+  const y=new Date(from+'T12:00:00').getFullYear();
+  const map={0:'Ene',1:'Feb',2:'Mar',3:'Abr',4:'May',5:'Jun',6:'Jul',7:'Ago',8:'Sep',9:'Oct',10:'Nov',11:'Dic'};
+  return stripeMonthlyData[`${map[m]} ${y}`]||stripeMonthlyData['Abr 2026'];
+}
+function applyCmpStripe(){
+  const a1=document.getElementById('cmpA1-stripe').value;
+  const a2=document.getElementById('cmpA2-stripe').value;
+  const b1=document.getElementById('cmpB1-stripe').value;
+  const b2=document.getElementById('cmpB2-stripe').value;
+  const dA=getStripeData(a1); const dB=getStripeData(b1);
+  const lA=`${fmtDate(a1)} → ${fmtDate(a2)}`; const lB=`${fmtDate(b1)} → ${fmtDate(b2)}`;
+  document.getElementById('headA-stripe').textContent=`PERIODO A — ${lA}`;
+  document.getElementById('headB-stripe').textContent=`PERIODO B — ${lB}`;
+
+  function kpicards(d,side){
+    const kpis=[
+      ['Ingresos Recurrentes (MRR)',`USD $${d.mrr.toLocaleString()}`,'g'],
+      ['MRR Nuevo',`USD $${d.newMrr.toLocaleString()}`,''],
+      ['Crecimiento Neto MRR',`+USD $${d.crec.toLocaleString()}`,'g'],
+      ['Clientes Activos',`${d.clientes}`,''],
+      ['Pruebas Gratuitas',`${d.trial}`,''],
+      ['Conv. Trial → Pago',`${d.conv}%`,'g'],
+      ['Clientes Nuevos',`${d.nuevos}`,'g'],
+      ['Tasa de Cancelación',`${d.churn}%`,d.churn>3?'dn':'g'],
+      ['Valor de Vida (LTV)',`USD $${d.ltv}`,'g'],
+    ];
+    return kpis.map(([l,v,c])=>`<div class="kcard"><div class="klbl">${l}</div><div class="kval ${c}" style="font-size:16px;">${v}</div></div>`).join('');
+  }
+  document.getElementById('colA-stripe-kpis').innerHTML=kpicards(dA,'A');
+  document.getElementById('colB-stripe-kpis').innerHTML=kpicards(dB,'B');
+
+  function movTable(d,side){
+    const color=side==='A'?'var(--gold2)':'var(--green)';
+    return `<div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Movimientos MRR</div>
+    <table class="alma-funnel-table"><thead><tr><th>Movimiento</th><th style="text-align:right">#</th><th style="text-align:right">USD</th></tr></thead><tbody>
+    <tr><td class="aft-name">✦ Renovaciones</td><td class="aft-val" style="color:var(--green)">${d.renov}</td><td class="aft-val" style="color:var(--green)">+$${(d.renov*59).toLocaleString()}</td></tr>
+    <tr><td class="aft-name">▲ Mejoras de Plan</td><td class="aft-val" style="color:var(--gold1)">${d.upgr}</td><td class="aft-val" style="color:var(--gold1)">+$${(d.upgr*40).toLocaleString()}</td></tr>
+    <tr><td class="aft-name">↑ Reactivaciones</td><td class="aft-val" style="color:var(--green)">${d.reac}</td><td class="aft-val" style="color:var(--green)">+$${(d.reac*60).toLocaleString()}</td></tr>
+    <tr><td class="aft-name">✗ Cancelaciones</td><td class="aft-val" style="color:var(--red)">${d.cancel}</td><td class="aft-val" style="color:var(--red)">-$${(d.cancel*60).toLocaleString()}</td></tr>
+    <tr><td class="aft-name">▼ Degradaciones</td><td class="aft-val" style="color:var(--red)">${d.downg}</td><td class="aft-val" style="color:var(--red)">-$${(d.downg*40).toLocaleString()}</td></tr>
+    <tr class="group-header"><td>MRR Inicio</td><td style="text-align:right">—</td><td style="text-align:right">$${d.mrrIni.toLocaleString()}</td></tr>
+    <tr class="group-header"><td>MRR Final</td><td style="text-align:right">—</td><td style="text-align:right">$${d.mrr.toLocaleString()}</td></tr>
+    </tbody></table>`;
+  }
+  document.getElementById('colA-stripe-table').innerHTML=movTable(dA,'A');
+  document.getElementById('colB-stripe-table').innerHTML=movTable(dB,'B');
+
+  // Analysis
+  const mrrDiff=((dA.mrr-dB.mrr)/dB.mrr*100).toFixed(1);
+  const convDiff=(dA.conv-dB.conv).toFixed(1);
+  const churnDiff=(dA.churn-dB.churn).toFixed(1);
+  const newMrrDiff=((dA.newMrr-dB.newMrr)/dB.newMrr*100).toFixed(1);
+  const mrrUp=dA.mrr>=dB.mrr;
+  document.getElementById('cmpinsight-stripe').innerHTML=`
+    <div class="cc"><div class="ctitle">📈 Análisis Comparativo — Ventas Spiritual Academy</div>
+    <div class="mejoras-box" style="margin-top:0;border-color:${mrrUp?'rgba(90,158,111,.35)':'rgba(160,80,80,.35)'};">
+      <div class="mejoras-title" style="color:${mrrUp?'#7ABE8A':'#D08080'};">${mrrUp?'✦':'⚠'} MRR: ${mrrUp?'+':''}${mrrDiff}% entre periodos</div>
+      <div class="mejora-item"><span class="mejora-badge" style="background:rgba(201,148,26,.15);color:var(--gold1);border:1px solid var(--border2);">Ingresos</span>
+        <div class="mejora-body"><div class="mejora-kpi">MRR: USD $${dB.mrr.toLocaleString()} → USD $${dA.mrr.toLocaleString()} (${mrrUp?'+':''}${mrrDiff}%)</div>
+        <div class="mejora-desc">${mrrUp?`El crecimiento fue impulsado por un MRR nuevo de USD $${dA.newMrr.toLocaleString()} (${parseFloat(newMrrDiff)>=0?'+':''}${newMrrDiff}% vs periodo anterior) y ${dA.nuevos} clientes nuevos. Las renovaciones se mantuvieron sólidas con ${dA.renov} clientes que renovaron.`:`El MRR disminuyó a pesar de ${dA.nuevos} clientes nuevos. El factor principal fue un mayor volumen de cancelaciones (${dA.cancel} vs ${dB.cancel}) combinado con menor MRR nuevo. Revisar la propuesta de valor y la experiencia de onboarding.`}</div></div></div>
+      <div class="mejora-item"><span class="mejora-badge" style="background:rgba(201,148,26,.15);color:var(--gold1);border:1px solid var(--border2);">Conversión</span>
+        <div class="mejora-body"><div class="mejora-kpi">Conv. trial: ${dB.conv}% → ${dA.conv}% (${parseFloat(convDiff)>=0?'+':''}${convDiff}pts)</div>
+        <div class="mejora-desc">${parseFloat(convDiff)>=0?`La mejora en conversión del trial indica que el producto está generando más valor percibido desde los primeros 7 días. Cada punto porcentual de mejora en conversión equivale a ~${Math.round(dA.trial*0.01)} clientes adicionales por mes.`:`La caída en conversión del trial puede estar relacionada con el perfil del tráfico que llega a la prueba gratuita. Revisar si los leads de Meta Ads están bien segmentados antes de iniciar el trial.`}</div></div></div>
+      <div class="mejora-item"><span class="mejora-badge" style="background:${parseFloat(churnDiff)>0?'rgba(160,80,80,.15)':'rgba(90,158,111,.15)'};color:${parseFloat(churnDiff)>0?'#D08080':'#7ABE8A'};border:1px solid ${parseFloat(churnDiff)>0?'rgba(160,80,80,.3)':'rgba(90,158,111,.3)'};">Retención</span>
+        <div class="mejora-body"><div class="mejora-kpi">Churn: ${dB.churn}% → ${dA.churn}% (${parseFloat(churnDiff)>=0?'+':''}${churnDiff}pts)</div>
+        <div class="mejora-desc">${parseFloat(churnDiff)>0?`El incremento en churn es la señal de alerta más importante. Con ${dA.cancel} cancelaciones en el periodo A vs ${dB.cancel} en el B, el impacto acumulado sobre el LTV es significativo. Prioridad: implementar programa de retención en semana 4 post-activación.`:`La reducción en cancelaciones refleja una mejor experiencia post-venta. Continuar con las iniciativas actuales de éxito del cliente y considerar un programa de reconocimiento para clientes de largo plazo.`}</div></div></div>
+    </div></div>`;
+}
+
+/* ── META COMPARE ── */
+const metaMonthlyData={
+  'Abr 2026':{gasto:3240,roas:5.7,leads:284,cpl:11.40,ctr:3.8,imp:142000,cpm:22.80,cpc:0.60,trials:87,cpTrial:37.24,convWeb:3.8,roasEsp:7.2,billEsp:2340},
+  'Mar 2026':{gasto:2900,roas:5.3,leads:225,cpl:12.90,ctr:3.2,imp:120000,cpm:24.17,cpc:0.65,trials:79,cpTrial:36.71,convWeb:3.2,roasEsp:6.9,billEsp:2240},
+  'Feb 2026':{gasto:3100,roas:5.2,leads:240,cpl:12.90,ctr:3.4,imp:128000,cpm:24.20,cpc:0.70,trials:73,cpTrial:42.47,convWeb:3.4,roasEsp:6.8,billEsp:2200},
+  'Ene 2026':{gasto:2600,roas:4.9,leads:195,cpl:13.30,ctr:3.0,imp:107000,cpm:24.30,cpc:0.75,trials:58,cpTrial:44.83,convWeb:3.0,roasEsp:6.3,billEsp:1980},
+};
+function getMetaData(from){
+  const m=new Date(from+'T12:00:00').getMonth();
+  const y=new Date(from+'T12:00:00').getFullYear();
+  const map={0:'Ene',1:'Feb',2:'Mar',3:'Abr',4:'May',5:'Jun',6:'Jul',7:'Ago',8:'Sep',9:'Oct',10:'Nov',11:'Dic'};
+  return metaMonthlyData[`${map[m]} ${y}`]||metaMonthlyData['Abr 2026'];
+}
+function applyCmpMeta(){
+  const a1=document.getElementById('cmpA1-meta').value;
+  const a2=document.getElementById('cmpA2-meta').value;
+  const b1=document.getElementById('cmpB1-meta').value;
+  const b2=document.getElementById('cmpB2-meta').value;
+  const dA=getMetaData(a1); const dB=getMetaData(b1);
+  const lA=`${fmtDate(a1)} → ${fmtDate(a2)}`; const lB=`${fmtDate(b1)} → ${fmtDate(b2)}`;
+  document.getElementById('headA-meta').textContent=`PERIODO A — ${lA}`;
+  document.getElementById('headB-meta').textContent=`PERIODO B — ${lB}`;
+
+  function metaKpis(d){
+    return [
+      ['Gasto Total',`USD $${d.gasto.toLocaleString()}`,''],
+      ['Pruebas Gratuitas',`${d.trials}`,'g'],
+      ['Costo por Trial',`USD $${d.cpTrial}`,''],
+      ['Ventas Esperadas',`${Math.round(d.trials*0.68)}`,'g'],
+      ['ROAS Actual',`${d.roas}x`,'g'],
+      ['Tasa Conv. Página',`${d.convWeb}%`,''],
+      ['Leads Generados',`${d.leads}`,''],
+      ['Costo por Lead',`USD $${d.cpl}`,''],
+      ['Impresiones',`${(d.imp/1000).toFixed(0)}K`,''],
+      ['CPM',`USD $${d.cpm}`,''],
+      ['CPC',`USD $${d.cpc}`,''],
+      ['CTR',`${d.ctr}%`,'g'],
+      ['ROAS Esperado',`${d.roasEsp}x`,'g'],
+      ['Facturación Esperada',`USD $${d.billEsp.toLocaleString()}`,'g'],
+    ].map(([l,v,c])=>`<div class="kcard"><div class="klbl">${l}</div><div class="kval ${c}" style="font-size:15px;">${v}</div></div>`).join('');
+  }
+  document.getElementById('colA-meta-kpis').innerHTML=metaKpis(dA);
+  document.getElementById('colB-meta-kpis').innerHTML=metaKpis(dB);
+
+  function metaFunnel(d,side){
+    const color=side==='A'?'var(--gold2)':'var(--green)';
+    const steps=[
+      {icon:'📢',label:'CPM — Costo por 1,000 impresiones',val:`USD $${d.cpm}`,ok:d.cpm<25},
+      {icon:'🖱️',label:'CPC — Costo por clic',val:`USD $${d.cpc}`,ok:d.cpc<1.0},
+      {icon:'🌐',label:'Costo por visita a la página',val:`USD $${(d.gasto/Math.round(d.leads/0.05)).toFixed(2)}`,ok:d.cpc<1.0},
+      {icon:'🎯',label:'Costo por prueba gratuita',val:`USD $${d.cpTrial}`,ok:d.cpTrial<40},
+    ];
+    return `<div style="font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;">Embudo de Costos</div>`+
+      steps.map((s,i)=>`<div style="background:var(--bg3);border:1px solid ${s.ok?'rgba(90,158,111,.3)':'rgba(160,80,80,.3)'};border-left:3px solid ${s.ok?'var(--green)':'var(--red)'};border-radius:6px;padding:8px 11px;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:14px;">${s.icon}</span>
+        <span style="font-size:10px;color:var(--text3);flex:1;">${s.label}</span>
+        <span style="font-size:13px;font-weight:700;color:${s.ok?'var(--green)':'var(--red)'};">${s.val}</span>
+        <span style="font-size:9px;padding:2px 6px;border-radius:8px;background:${s.ok?'rgba(90,158,111,.15)':'rgba(160,80,80,.15)'};color:${s.ok?'#7ABE8A':'#D08080'};">${s.ok?'✓ OK':'⚠'}</span>
+      </div>`).join('');
+  }
+  document.getElementById('colA-meta-funnel').innerHTML=metaFunnel(dA,'A');
+  document.getElementById('colB-meta-funnel').innerHTML=metaFunnel(dB,'B');
+
+  // Analysis
+  const gastoDiff=((dA.gasto-dB.gasto)/dB.gasto*100).toFixed(1);
+  const trialDiff=((dA.trials-dB.trials)/dB.trials*100).toFixed(1);
+  const roasDiff=(dA.roas-dB.roas).toFixed(1);
+  const cpmDiff=(dA.cpm-dB.cpm).toFixed(2);
+  const roasUp=dA.roas>=dB.roas;
+  document.getElementById('cmpinsight-meta').innerHTML=`
+    <div class="cc"><div class="ctitle">📈 Análisis Comparativo — Marketing / ADS</div>
+    <div class="mejoras-box" style="margin-top:0;border-color:${roasUp?'rgba(90,158,111,.35)':'rgba(160,80,80,.35)'};">
+      <div class="mejoras-title" style="color:${roasUp?'#7ABE8A':'#D08080'};">${roasUp?'✦':'⚠'} ROAS: ${dB.roas}x → ${dA.roas}x (${parseFloat(roasDiff)>=0?'+':''}${roasDiff}pts)</div>
+      <div class="mejora-item"><span class="mejora-badge" style="background:rgba(201,148,26,.15);color:var(--gold1);border:1px solid var(--border2);">Inversión</span>
+        <div class="mejora-body"><div class="mejora-kpi">Gasto: USD $${dB.gasto.toLocaleString()} → USD $${dA.gasto.toLocaleString()} (${parseFloat(gastoDiff)>=0?'+':''}${gastoDiff}%)</div>
+        <div class="mejora-desc">${parseFloat(gastoDiff)>=0?`El incremento en gasto generó ${trialDiff}% más pruebas gratuitas (${dB.trials} → ${dA.trials}). La eficiencia mejoró ya que el ROAS subió de ${dB.roas}x a ${dA.roas}x, lo que indica que la audiencia y los creativos están mejor calibrados.`:`La reducción en presupuesto impactó el volumen de trials (${dB.trials} → ${dA.trials}, ${trialDiff}%). Sin embargo, el ROAS ${roasUp?'mejoró':'cayó'}, lo que indica que ${roasUp?'la calidad del gasto mejoró con menor presupuesto':'la reducción afectó la escala necesaria para mantener eficiencia'}.`}</div></div></div>
+      <div class="mejora-item"><span class="mejora-badge" style="background:rgba(201,148,26,.15);color:var(--gold1);border:1px solid var(--border2);">Audiencia</span>
+        <div class="mejora-body"><div class="mejora-kpi">CPM: USD $${dB.cpm} → USD $${dA.cpm} (${parseFloat(cpmDiff)>=0?'+':''}${cpmDiff})</div>
+        <div class="mejora-desc">${parseFloat(cpmDiff)<0?`El CPM bajó de USD $${dB.cpm} a USD $${dA.cpm}, lo que indica menor saturación de audiencia o mejor relevancia del anuncio para el algoritmo. Esto se traduce directamente en más impresiones con el mismo presupuesto.`:`El CPM subió, posiblemente por mayor competencia en la subasta de Meta o por una audiencia más acotada. Evaluar si conviene ampliar la audiencia objetivo o rotar creativos para recuperar relevancia.`}</div></div></div>
+      <div class="mejora-item"><span class="mejora-badge" style="background:rgba(74,144,217,.15);color:#4A90D9;border:1px solid rgba(74,144,217,.3);">Conversión</span>
+        <div class="mejora-body"><div class="mejora-kpi">Conv. página: ${dB.convWeb}% → ${dA.convWeb}% | Costo/Trial: USD $${dB.cpTrial} → USD $${dA.cpTrial}</div>
+        <div class="mejora-desc">El cambio en la tasa de conversión de la página ${dA.convWeb>=dB.convWeb?'mejoró, reduciendo':'empeoró, elevando'} el costo por trial de manera proporcional. El cuello de botella principal ${dA.cpTrial>38?'sigue siendo la página de captura — menos del 4% de visitantes inicia el trial':'se está resolviendo gradualmente a medida que la página mejora'}. Recordar que cada punto de mejora en conversión puede reducir el costo por trial en ~USD $${(dA.cpTrial*0.025).toFixed(2)}/trial.</div></div></div>
+    </div></div>`;
+}
+function showCmpInfo(tab){
+  if(tab==='fin'){ applyCmpFin(); return; }
+  if(tab==='alma-sales'){ applyCmpAlmaSales(); return; }
+  if(tab==='alma-mkt'){ applyCmpAlmaMkt(); return; }
+  const a1=document.getElementById('cmpA1-'+tab)?.value;
+  const a2=document.getElementById('cmpA2-'+tab)?.value;
+  const b1=document.getElementById('cmpB1-'+tab)?.value;
+  const b2=document.getElementById('cmpB2-'+tab)?.value;
+  const el=document.getElementById('cmpresult-'+tab);
+  if(el) el.innerHTML=`<span class="alert-ic">◈</span>Comparando periodos seleccionados.`;
+}
+
+
+/* ── ALMA SALES DATA & COMPARE ── */
+const almaSalesData={
+  'Abr 2026':{ventas:54000,ticket:3000,leads:64,confLlamadas:41,clientes:18,conv:43.9,asist:41,pctAsist:74.5,diasCierre:1.2,epb:1350,bts:32.7},
+  'Mar 2026':{ventas:45000,ticket:3000,leads:55,confLlamadas:35,clientes:15,conv:42.8,asist:35,pctAsist:72.9,diasCierre:1.4,epb:1200,bts:31.5},
+  'Feb 2026':{ventas:39000,ticket:3000,leads:47,confLlamadas:30,clientes:13,conv:43.3,asist:30,pctAsist:71.4,diasCierre:1.5,epb:1100,bts:30.0},
+  'Ene 2026':{ventas:33000,ticket:3000,leads:40,confLlamadas:25,clientes:11,conv:44.0,asist:25,pctAsist:71.4,diasCierre:1.6,epb:960,bts:27.5},
+};
+function getAlmaSalesData(from){
+  const mo=new Date(from+'T12:00:00').getMonth();
+  const y=new Date(from+'T12:00:00').getFullYear();
+  const mp={0:'Ene',1:'Feb',2:'Mar',3:'Abr'};
+  return almaSalesData[(mp[mo]||'Abr')+' '+y]||almaSalesData['Abr 2026'];
+}
+function applyCmpAlmaSales(){
+  const a1=document.getElementById('cmpA1-alma-sales').value;
+  const a2=document.getElementById('cmpA2-alma-sales').value;
+  const b1=document.getElementById('cmpB1-alma-sales').value;
+  const b2=document.getElementById('cmpB2-alma-sales').value;
+  const dA=getAlmaSalesData(a1); const dB=getAlmaSalesData(b1);
+  const lA=fmtDate(a1)+' \u2192 '+fmtDate(a2); const lB=fmtDate(b1)+' \u2192 '+fmtDate(b2);
+  document.getElementById('headA-alma-sales').textContent='PERIODO A \u2014 '+lA;
+  document.getElementById('headB-alma-sales').textContent='PERIODO B \u2014 '+lB;
+  function kpis(d){
+    return [['Ventas Totales','USD $'+d.ventas.toLocaleString(),'g'],['Ticket Promedio','USD $'+d.ticket.toLocaleString(),'g'],
+      ['Leads Asignados',d.leads,''],['Llamadas Confirmadas',d.confLlamadas,''],
+      ['Clientes Nuevos',d.clientes,'g'],['% Conv. a Venta',d.conv+'%','g']
+    ].map(([l,v,c])=>'<div class="kcard"><div class="klbl">'+l+'</div><div class="kval '+c+'" style="font-size:15px;">'+v+'</div></div>').join('');
+  }
+  document.getElementById('colA-alma-sales-kpis').innerHTML=kpis(dA);
+  document.getElementById('colB-alma-sales-kpis').innerHTML=kpis(dB);
+  function ft(d){
+    const rows=[['#Asistencias','Asistieron a la llamada',d.asist],['% Asistencia','Tasa de asistencia',d.pctAsist+'%'],
+      ['# Ventas','Ventas cerradas',d.clientes],['% Conversión','Tasa cierre/asistentes',d.conv+'%'],
+      ['Días Cierre','Días sesión → venta',d.diasCierre+' días'],['Ganancia/Llamada','Ingreso por cita','USD $'+d.epb],
+      ['% Agenda→Venta','Agendas convertidas',d.bts+'%'],['Ticket Promedio','Valor por venta','USD $'+d.ticket.toLocaleString()]];
+    return '<table class="alma-funnel-table"><thead><tr><th>Métrica</th><th style="text-align:right">Resultado</th></tr></thead><tbody>'+
+      rows.map(([c,n,v])=>'<tr><td><span class="aft-code">'+c+'</span> <span class="aft-name">'+n+'</span></td><td class="aft-val">'+v+'</td></tr>').join('')+'</tbody></table>';
+  }
+  document.getElementById('colA-alma-sales-table').innerHTML=ft(dA);
+  document.getElementById('colB-alma-sales-table').innerHTML=ft(dB);
+  const vd=((dA.ventas-dB.ventas)/dB.ventas*100).toFixed(1);
+  const cd=(dA.conv-dB.conv).toFixed(1);
+  const ad=(dA.pctAsist-dB.pctAsist).toFixed(1);
+  const vUp=dA.ventas>=dB.ventas;
+  document.getElementById('cmpinsight-alma-sales').innerHTML=
+    '<div class="cc"><div class="ctitle">\ud83d\udcc8 An\u00e1lisis Comparativo \u2014 Ventas Aceleradora ALMA</div>'+
+    '<div class="mejoras-box" style="margin-top:0;border-color:'+(vUp?'rgba(90,158,111,.35)':'rgba(160,80,80,.35)')+';">'+
+    '<div class="mejoras-title" style="color:'+(vUp?'#7ABE8A':'#D08080')+'">'+(vUp?'\u2756':'\u26a0')+' Ventas: USD $'+dB.ventas.toLocaleString()+' \u2192 USD $'+dA.ventas.toLocaleString()+' ('+(vUp?'+':'')+vd+'%)</div>'+
+    '<div class="mejora-item"><span class="mejora-badge mb-medio">Facturaci\u00f3n</span><div class="mejora-body">'+
+    '<div class="mejora-kpi">'+dA.clientes+' clientes cerrados vs '+dB.clientes+' en periodo B. Ticket est\u00e1ble a USD $'+dA.ticket.toLocaleString()+'.</div>'+
+    '<div class="mejora-desc">'+(vUp?'El crecimiento fue impulsado por '+Math.abs(dA.clientes-dB.clientes)+' clientes adicionales. Con ticket fijo, cada venta adicional agrega USD $'+dA.ticket.toLocaleString()+' directamente a la facturaci\u00f3n.':'La ca\u00edda en ventas se explica por '+Math.abs(dA.clientes-dB.clientes)+' clientes menos cerrados. Con ticket fijo a USD $'+dA.ticket.toLocaleString()+', cada venta no concretada es ingreso directo no capturado.')+'</div></div></div>'+
+    '<div class="mejora-item"><span class="mejora-badge mb-medio">Conversi\u00f3n</span><div class="mejora-body">'+
+    '<div class="mejora-kpi">Conv. a venta: '+dB.conv+'% \u2192 '+dA.conv+'% ('+(parseFloat(cd)>=0?'+':'')+cd+'pts) | Asistencia: '+dB.pctAsist+'% \u2192 '+dA.pctAsist+'%</div>'+
+    '<div class="mejora-desc">'+(parseFloat(cd)>=0?'La tasa de cierre mejor\u00f3, se\u00f1al de refinamiento en el manejo de objeciones del equipo. Continuar con roleplay de ventas semanales para mantener la tendencia.':'La ca\u00edda en conversi\u00f3n puede reflejar un cambio en el perfil del prospecto o una brecha en el script de venta. Revisar grabaciones de llamadas para identificar el punto exacto donde se pierden los cierres.')+'</div></div></div>'+
+    '<div class="mejora-item"><span class="mejora-badge mb-medio">Pipeline</span><div class="mejora-body">'+
+    '<div class="mejora-kpi">Leads: '+dB.leads+' \u2192 '+dA.leads+' | Ganancia por llamada: USD $'+dB.epb+' \u2192 USD $'+dA.epb+'</div>'+
+    '<div class="mejora-desc">El ratio de ganancia por llamada '+(dA.epb>=dB.epb?'mejor\u00f3, indicando que cada cita agendada vale m\u00e1s que en el periodo anterior. Esto es se\u00f1al de mejor calificaci\u00f3n de leads.':'baj\u00f3, lo que indica que las citas generaron menos valor. Revisar el proceso de calificaci\u00f3n antes de agendar para asegurar que solo lleguen prospectos con intenci\u00f3n real de compra.')+'</div></div></div>'+
+    '</div></div>';
+}
+
+/* ── ALMA MKT DATA & COMPARE ── */
+const almaMktData={
+  'Abr 2026':{gasto:4800,imp:210000,alcance:148000,cpm:22.86,freq:1.42,clics:3360,cpc:1.43,ctr:1.6,visitas:2880,leads:144,cpl:33.33,convPag:5.0,agendas:55,calificados:41,cac:266.67,roi:1025,ventas:54000},
+  'Mar 2026':{gasto:4200,imp:185000,alcance:132000,cpm:22.70,freq:1.40,clics:2960,cpc:1.42,ctr:1.6,visitas:2520,leads:126,cpl:33.33,convPag:5.0,agendas:48,calificados:36,cac:280.00,roi:971,ventas:45000},
+  'Feb 2026':{gasto:3800,imp:165000,alcance:118000,cpm:23.03,freq:1.40,clics:2660,cpc:1.43,ctr:1.6,visitas:2280,leads:114,cpl:33.33,convPag:5.0,agendas:43,calificados:32,cac:292.30,roi:926,ventas:39000},
+  'Ene 2026':{gasto:3200,imp:139000,alcance:99000,cpm:23.02,freq:1.40,clics:2240,cpc:1.43,ctr:1.6,visitas:1920,leads:96,cpl:33.33,convPag:5.0,agendas:36,calificados:27,cac:290.90,roi:931,ventas:33000},
+};
+function getAlmaMktData(from){
+  const mo=new Date(from+'T12:00:00').getMonth();
+  const y=new Date(from+'T12:00:00').getFullYear();
+  const mp={0:'Ene',1:'Feb',2:'Mar',3:'Abr'};
+  return almaMktData[(mp[mo]||'Abr')+' '+y]||almaMktData['Abr 2026'];
+}
+function applyCmpAlmaMkt(){
+  const a1=document.getElementById('cmpA1-alma-mkt').value;
+  const a2=document.getElementById('cmpA2-alma-mkt').value;
+  const b1=document.getElementById('cmpB1-alma-mkt').value;
+  const b2=document.getElementById('cmpB2-alma-mkt').value;
+  const dA=getAlmaMktData(a1); const dB=getAlmaMktData(b1);
+  const lA=fmtDate(a1)+' \u2192 '+fmtDate(a2); const lB=fmtDate(b1)+' \u2192 '+fmtDate(b2);
+  document.getElementById('headA-alma-mkt').textContent='PERIODO A \u2014 '+lA;
+  document.getElementById('headB-alma-mkt').textContent='PERIODO B \u2014 '+lB;
+  function kpis(d){
+    return [['Gasto Total','USD $'+d.gasto.toLocaleString(),''],['Clientes Nuevos',Math.round(d.calificados*0.439),'g'],
+      ['Costo por Cliente','USD $'+Math.round(d.cac),''],['Ventas Generadas','USD $'+d.ventas.toLocaleString(),'g'],
+      ['Ganancia Neta','USD $'+(d.ventas-d.gasto).toLocaleString(),'g'],['Retorno (ROI)',d.roi+'%','g']
+    ].map(([l,v,c])=>'<div class="kcard"><div class="klbl">'+l+'</div><div class="kval '+c+'" style="font-size:15px;">'+v+'</div></div>').join('');
+  }
+  document.getElementById('colA-alma-mkt-kpis').innerHTML=kpis(dA);
+  document.getElementById('colB-alma-mkt-kpis').innerHTML=kpis(dB);
+  function ft(d){
+    const rows=[['$Gasto','Gasto Total','USD $'+d.gasto.toLocaleString()],['#Impresiones','Impresiones',d.imp.toLocaleString()],
+      ['#Alcance','Alcance \u00fanico',d.alcance.toLocaleString()],['$CPM','Costo/1,000 impresiones','USD $'+d.cpm],
+      ['Frecuencia','Veces visto por persona',d.freq+'x'],['#Clics','Clics al anuncio',d.clics.toLocaleString()],
+      ['$CPC','Costo por clic','USD $'+d.cpc],['%CTR','% que hicieron clic',d.ctr+'%'],
+      ['#Visitas','Visitantes a la p\u00e1gina',d.visitas.toLocaleString()],['#Leads','Leads capturados',d.leads],
+      ['$CPL','Costo por lead','USD $'+d.cpl],['%Conv. P\u00e1g.','% visitantes \u2192 lead',d.convPag+'%'],
+      ['#Agendas','Citas agendadas',d.agendas],['#Calificados','Prospectos calificados',d.calificados],
+      ['$CAC','Costo de adquisici\u00f3n','USD $'+Math.round(d.cac)],['#ROI','Retorno inversi\u00f3n',d.roi+'%']];
+    return '<table class="alma-funnel-table"><thead><tr><th>M\u00e9trica</th><th style="text-align:right">Resultado</th></tr></thead><tbody>'+
+      rows.map(([c,n,v])=>'<tr><td><span class="aft-code">'+c+'</span> <span class="aft-name">'+n+'</span></td><td class="aft-val">'+v+'</td></tr>').join('')+'</tbody></table>';
+  }
+  document.getElementById('colA-alma-mkt-table').innerHTML=ft(dA);
+  document.getElementById('colB-alma-mkt-table').innerHTML=ft(dB);
+  const gd=((dA.gasto-dB.gasto)/dB.gasto*100).toFixed(1);
+  const rd=(dA.roi-dB.roi).toFixed(0);
+  const ld=((dA.leads-dB.leads)/dB.leads*100).toFixed(1);
+  const vd=((dA.ventas-dB.ventas)/dB.ventas*100).toFixed(1);
+  const rUp=dA.roi>=dB.roi;
+  document.getElementById('cmpinsight-alma-mkt').innerHTML=
+    '<div class="cc"><div class="ctitle">\ud83d\udcc8 An\u00e1lisis Comparativo \u2014 Marketing ALMA</div>'+
+    '<div class="mejoras-box" style="margin-top:0;border-color:'+(rUp?'rgba(90,158,111,.35)':'rgba(160,80,80,.35)')+';">'+
+    '<div class="mejoras-title" style="color:'+(rUp?'#7ABE8A':'#D08080')+'">'+(rUp?'\u2756':'\u26a0')+' ROI: '+dB.roi+'% \u2192 '+dA.roi+'% ('+(parseFloat(rd)>=0?'+':'')+rd+'pts)</div>'+
+    '<div class="mejora-item"><span class="mejora-badge mb-medio">Inversi\u00f3n</span><div class="mejora-body">'+
+    '<div class="mejora-kpi">Gasto: +'+gd+'% | Ventas: +'+vd+'% | Leads: +'+ld+'%</div>'+
+    '<div class="mejora-desc">'+(parseFloat(vd)>parseFloat(gd)?'Las ventas crecieron m\u00e1s r\u00e1pido que el gasto, confirmando apalancamiento en el embudo. Escalar el presupuesto es justificado en este escenario.':'El gasto creci\u00f3 m\u00e1s r\u00e1pido que las ventas. Antes de escalar m\u00e1s presupuesto, optimizar la conversi\u00f3n de la p\u00e1gina (actualmente al '+dA.convPag+'%).')+'</div></div></div>'+
+    '<div class="mejora-item"><span class="mejora-badge mb-medio">Embudo</span><div class="mejora-body">'+
+    '<div class="mejora-kpi">Conv. p\u00e1gina: '+dB.convPag+'% \u2192 '+dA.convPag+'% | CPL: USD $'+dB.cpl+' \u2192 USD $'+dA.cpl+'</div>'+
+    '<div class="mejora-desc">La conversi\u00f3n de p\u00e1gina es el principal cuello de botella y permanece igual en ambos periodos al '+dA.convPag+'%. El volumen de leads escala con el presupuesto pero la eficiencia no mejora. La acci\u00f3n clave es un A/B test en la landing page antes del siguiente ciclo de inversi\u00f3n.</div></div></div>'+
+    '<div class="mejora-item"><span class="mejora-badge mb-medio">Calificaci\u00f3n</span><div class="mejora-body">'+
+    '<div class="mejora-kpi">Calificados: '+dB.calificados+' \u2192 '+dA.calificados+' | CAC: USD $'+Math.round(dB.cac)+' \u2192 USD $'+Math.round(dA.cac)+'</div>'+
+    '<div class="mejora-desc">El CAC '+(dA.cac<dB.cac?'mejor\u00f3 de USD $'+Math.round(dB.cac)+' a USD $'+Math.round(dA.cac)+', se\u00f1al de mayor eficiencia al escalar.':'subi\u00f3, lo que indica que el costo por cliente sube al escalar. Optimizar el proceso de calificaci\u00f3n para filtrar mejor antes de la agenda.')+' El ratio calificados/agendas se mantiene est\u00e1ble (~74%), lo que confirma consistencia en la pre-calificaci\u00f3n.</div></div></div>'+
+    '</div></div>';
+}
+
+/* Datos financieros por mes para comparativa */
+const finData={
+  'Abr 2026':{ing:72450,costosDir:8040,costosComp:3200,costosOp:6400,gBruta:65410,gNeta:55810,caja:48200,saIng:18450,almaIng:54000,saCosts:5840,almaCosts:11800,margenSA:75,margenALMA:88},
+  'Mar 2026':{ing:62430,costosDir:7800,costosComp:3200,costosOp:6200,gBruta:55430,gNeta:45230,caja:42000,saIng:16630,almaIng:45800,saCosts:5600,almaCosts:10200,margenSA:72,margenALMA:86},
+  'Feb 2026':{ing:55600,costosDir:7900,costosComp:3200,costosOp:6000,gBruta:48500,gNeta:38700,caja:36100,saIng:16200,almaIng:39400,saCosts:5400,almaCosts:9200,margenSA:70,margenALMA:84},
+  'Ene 2026':{ing:48200,costosDir:7200,costosComp:3200,costosOp:5800,gBruta:41800,gNeta:32800,caja:30500,saIng:15400,almaIng:32800,saCosts:5100,almaCosts:8400,margenSA:68,margenALMA:82},
+};
+
+function applyCmpFin(){
+  const a1=document.getElementById('cmpA1-fin').value;
+  const a2=document.getElementById('cmpA2-fin').value;
+  const b1=document.getElementById('cmpB1-fin').value;
+  const b2=document.getElementById('cmpB2-fin').value;
+
+  // Determine which monthly data to use based on date ranges
+  function getDataForRange(from,to){
+    const m=new Date(from).getMonth();
+    const y=new Date(from).getFullYear();
+    const keys=['Ene 2026','Feb 2026','Mar 2026','Abr 2026'];
+    const key=keys.find(k=>{ const [mn,yr]=k.split(' '); const mIdx=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'].indexOf(mn); return mIdx===m&&parseInt(yr)===y; });
+    return finData[key]||finData['Abr 2026'];
+  }
+  const dA=getDataForRange(a1,a2);
+  const dB=getDataForRange(b1,b2);
+  const labelA=`${fmtDate(a1)} → ${fmtDate(a2)}`;
+  const labelB=`${fmtDate(b1)} → ${fmtDate(b2)}`;
+
+  document.getElementById('headA-fin').innerHTML=`<span style="color:var(--gold2)">Periodo A:</span> ${labelA}`;
+  document.getElementById('headB-fin').innerHTML=`<span style="color:var(--green)">Periodo B:</span> ${labelB}`;
+
+  function kpis(d){
+    return [
+      ['Ingresos Totales',`USD $${d.ing.toLocaleString()}`,'g'],
+      ['Costos Directos',`USD $${d.costosDir.toLocaleString()}`,''],
+      ['Costos Compartidos',`USD $${d.costosComp.toLocaleString()}`,''],
+      ['Costos de Equipo',`USD $${d.costosOp.toLocaleString()}`,''],
+      ['Ganancia Bruta',`USD $${d.gBruta.toLocaleString()}`,'g'],
+      ['Ganancia Neta',`USD $${d.gNeta.toLocaleString()}`,'g'],
+      ['SA Ingresos',`USD $${d.saIng.toLocaleString()}`,''],
+      ['SA Margen',`${d.margenSA}%`,'g'],
+      ['ALMA Ingresos',`USD $${d.almaIng.toLocaleString()}`,''],
+      ['ALMA Margen',`${d.margenALMA}%`,'g'],
+    ].map(([l,v,c])=>`<div class="kcard"><div class="klbl">${l}</div><div class="kval ${c}" style="font-size:15px;">${v}</div></div>`).join('');
+  }
+  document.getElementById('finA-kpis').innerHTML=kpis(dA);
+  document.getElementById('finB-kpis').innerHTML=kpis(dB);
+
+  // Analysis
+  const ingDiff=((dA.ing-dB.ing)/dB.ing*100).toFixed(1);
+  const margenDiff=(((dA.gNeta/dA.ing)-(dB.gNeta/dB.ing))*100).toFixed(1);
+  const costDiff=((dA.costosDir-dB.costosDir)/dB.costosDir*100).toFixed(1);
+  const almaGrow=((dA.almaIng-dB.almaIng)/dB.almaIng*100).toFixed(1);
+  const saGrow=((dA.saIng-dB.saIng)/dB.saIng*100).toFixed(1);
+  const ingUp=dA.ing>=dB.ing;
+  const margenUp=parseFloat(margenDiff)>=0;
+
+  const analysis=`
+    <div class="cc">
+      <div class="ctitle">📈 Análisis Comparativo de Periodos</div>
+      <div class="mejoras-box" style="margin-top:0;border-color:${ingUp?'rgba(90,158,111,.35)':'rgba(160,80,80,.35)'};">
+        <div class="mejoras-title" style="color:${ingUp?'#7ABE8A':'#D08080'};">${ingUp?'✦ Crecimiento positivo':'⚠ Contracción de ingresos'} — Ingresos: ${ingUp?'+':''}${ingDiff}%</div>
+        <div class="mejora-item">
+          <span class="mejora-badge" style="background:rgba(201,148,26,.15);color:var(--gold1);border:1px solid var(--border2);">Ingresos</span>
+          <div class="mejora-body">
+            <div class="mejora-kpi">De USD $${dB.ing.toLocaleString()} → USD $${dA.ing.toLocaleString()} (${ingUp?'+':''}${ingDiff}%)</div>
+            <div class="mejora-desc">
+              ${ingUp
+                ? `El crecimiento fue impulsado principalmente por Aceleradora ALMA (+${almaGrow}%) que representa el ${((dA.almaIng/dA.ing)*100).toFixed(0)}% del ingreso total. Spiritual Academy creció un ${saGrow}% de forma complementaria con su base recurrente (MRR). La estructura de ingresos es saludable: un 75% variable (ALMA) y 25% recurrente (SA) que protege el flujo de caja.`
+                : `La contracción fue afectada por una disminución en cierres de ALMA (${almaGrow}%) y un crecimiento del MRR de SA más lento de lo esperado (${saGrow}%). Evaluar si fue un factor estacional o si hay un problema de pipeline que corregir.`
+              }
+            </div>
+          </div>
+        </div>
+        <div class="mejora-item">
+          <span class="mejora-badge" style="background:rgba(201,148,26,.15);color:var(--gold1);border:1px solid var(--border2);">Margen</span>
+          <div class="mejora-body">
+            <div class="mejora-kpi">Margen neto: ${((dB.gNeta/dB.ing)*100).toFixed(1)}% → ${((dA.gNeta/dA.ing)*100).toFixed(1)}% (${margenUp?'+':''}${margenDiff}pts)</div>
+            <div class="mejora-desc">
+              ${margenUp
+                ? `La mejora en margen indica que los ingresos crecieron más rápido que los costos. Los costos compartidos (CRM, plataformas, administración) permanecen fijos en USD $${dA.costosComp.toLocaleString()}/mes independientemente del volumen, lo que genera apalancamiento operativo positivo al escalar.`
+                : `El margen se comprimió porque los costos crecieron más rápido que los ingresos. Revisar si el incremento en costos operativos (closers, soporte) estuvo justificado por el volumen o si hay ineficiencias a corregir.`
+              }
+            </div>
+          </div>
+        </div>
+        <div class="mejora-item">
+          <span class="mejora-badge" style="background:rgba(201,148,26,.15);color:var(--gold1);border:1px solid var(--border2);">Costos</span>
+          <div class="mejora-body">
+            <div class="mejora-kpi">Costos directos: USD $${dB.costosDir.toLocaleString()} → USD $${dA.costosDir.toLocaleString()} (${parseFloat(costDiff)>=0?'+':''}${costDiff}%)</div>
+            <div class="mejora-desc">Los costos compartidos (CRM, plataformas, administración) se mantienen en USD $${dA.costosComp.toLocaleString()} en ambos periodos — esto es positivo: son costos fijos que no escalan con el volumen. El incremento/reducción en costos directos refleja principalmente el cambio en inversión publicitaria entre periodos. Una buena señal es que el ratio costo/ingreso se mantiene controlado.</div>
+          </div>
+        </div>
+        <div class="mejora-item">
+          <span class="mejora-badge" style="background:rgba(74,144,217,.15);color:#4A90D9;border:1px solid rgba(74,144,217,.3);">¿Por qué?</span>
+          <div class="mejora-body">
+            <div class="mejora-kpi">Factores que explican la diferencia entre periodos</div>
+            <div class="mejora-desc">
+              <b>Periodo A (${labelA}):</b> Ingresos USD $${dA.ing.toLocaleString()}, margen neto ${((dA.gNeta/dA.ing)*100).toFixed(1)}%. ALMA aportó el ${((dA.almaIng/dA.ing)*100).toFixed(0)}% del total. Los costos compartidos representaron el ${((dA.costosComp/dA.ing)*100).toFixed(1)}% de ingresos — baja carga fija por el volumen generado.<br><br>
+              <b>Periodo B (${labelB}):</b> Ingresos USD $${dB.ing.toLocaleString()}, margen neto ${((dB.gNeta/dB.ing)*100).toFixed(1)}%. Los costos compartidos representaron el ${((dB.costosComp/dB.ing)*100).toFixed(1)}% de ingresos — mayor peso relativo al ser menor el volumen. Esto confirma la importancia de escalar para diluir los costos fijos compartidos.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('fin-cmp-analysis').innerHTML=analysis;
+}
+
+/* ── CHARTS ── */
+new Chart(document.getElementById('mrrLine'),{
+  type:'line',
+  data:{
+    labels:(function(){
+      const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const now=new Date(); const result=[];
+      for(let i=6;i>=0;i--){
+        const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+        result.push(months[d.getMonth()]+' '+String(d.getFullYear()).slice(2));
+      }
+      return result;
+    })(),
+    datasets:[
+      {label:'MRR total',data:[0,0,0,0,0,0,0],borderColor:'#F0C040',backgroundColor:'rgba(240,192,64,.07)',pointBackgroundColor:'#F0C040',tension:.4,fill:true,borderWidth:2,pointRadius:4},
+      {label:'MRR Nuevo',data:[0,0,0,0,0,0,0],borderColor:'#5A9E6F',backgroundColor:'transparent',pointBackgroundColor:'#5A9E6F',tension:.4,borderWidth:2,pointRadius:4,borderDash:[4,3]},
+      {label:'MRR Cancelado',data:[0,0,0,0,0,0,0],borderColor:'#A05050',backgroundColor:'transparent',pointBackgroundColor:'#A05050',tension:.4,borderWidth:2,pointRadius:4,borderDash:[4,3]}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{labels:{color:tc,font:{size:10}}}},
+    scales:{y:{grid:{color:gc},ticks:{color:tc,font:{size:10},callback:v=>'$'+v.toLocaleString()},beginAtZero:true},x:{grid:{color:gc},ticks:{color:tc,font:{size:10}}}}
+  }
+})
+
+new Chart(document.getElementById('trialChart'),{
+  type:'bar',
+  data:{
+    labels:(function(){
+      const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      const now=new Date(); const result=[];
+      for(let i=5;i>=0;i--){
+        const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+        result.push(months[d.getMonth()]+' '+String(d.getFullYear()).slice(2));
+      }
+      return result;
+    })(),
+    datasets:[
+      {label:'Trials iniciados',data:[0,0,0,0,0,0],backgroundColor:'rgba(240,192,64,.55)',borderColor:'#F0C040',borderWidth:1,borderRadius:3,yAxisID:'y'},
+      {label:'Costo por Trial (USD)',data:[0,0,0,0,0,0],type:'line',borderColor:'rgba(74,144,217,.9)',backgroundColor:'rgba(74,144,217,.15)',pointBackgroundColor:'#4A90D9',pointRadius:4,yAxisID:'y2',tension:.4}
+    ]
+  },
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{labels:{color:tc,font:{size:10}}}},
+    scales:{
+      y:{position:'left',grid:{color:gc},ticks:{color:tc,font:{size:10}},title:{display:true,text:'Trials',color:tc,font:{size:9}}},
+      y2:{position:'right',grid:{drawOnChartArea:false},ticks:{color:'#4A90D9',font:{size:10}},title:{display:true,text:'USD/Trial',color:'#4A90D9',font:{size:9}}}
+    }
+  }
+})
+
+/* ── META TABLA DIARIA ── */
+(function(){
+  const days=[
+    {d:'01 Abr',gD:108,imp:4700,clicks:178,visits:114,trials:3},
+    {d:'02 Abr',gD:110,imp:4780,clicks:182,visits:116,trials:3},
+    {d:'03 Abr',gD:105,imp:4610,clicks:175,visits:112,trials:2},
+    {d:'04 Abr',gD:112,imp:4820,clicks:184,visits:117,trials:3},
+    {d:'05 Abr',gD:98, imp:4200,clicks:162,visits:103,trials:2},
+    {d:'06 Abr',gD:95, imp:4080,clicks:158,visits:101,trials:2},
+    {d:'07 Abr',gD:118,imp:5010,clicks:192,visits:122,trials:4},
+    {d:'08 Abr',gD:115,imp:4900,clicks:189,visits:121,trials:4},
+    {d:'09 Abr',gD:108,imp:4700,clicks:178,visits:114,trials:3},
+    {d:'10 Abr',gD:112,imp:4810,clicks:183,visits:117,trials:3},
+    {d:'11 Abr',gD:120,imp:5120,clicks:196,visits:125,trials:4},
+    {d:'12 Abr',gD:125,imp:5300,clicks:203,visits:130,trials:5},
+  ];
+  let acum=0; const tbody=document.getElementById('sa-meta-daily-body');
+  let tG=0,tI=0,tC=0,tV=0,tT=0;
+  days.forEach(r=>{
+    acum+=r.gD; tG+=r.gD; tI+=r.imp; tC+=r.clicks; tV+=r.visits; tT+=r.trials;
+    const cpm=(r.gD/r.imp*1000).toFixed(2);
+    const cpc=(r.gD/r.clicks).toFixed(2);
+    const ctr=(r.clicks/r.imp*100).toFixed(2);
+    const cpv=(r.gD/r.visits).toFixed(2);
+    const cpt=r.trials>0?(r.gD/r.trials).toFixed(2):'—';
+    const conv=(r.trials/r.visits*100).toFixed(1);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.d}</td><td class="aft-val" style="font-size:11px;">$${acum.toLocaleString()}</td><td class="aft-val" style="font-size:11px;">$${r.gD}</td><td class="aft-val" style="font-size:11px;">${r.imp.toLocaleString()}</td><td class="aft-val" style="font-size:11px;">$${cpm}</td><td class="aft-val" style="font-size:11px;">${r.clicks.toLocaleString()}</td><td class="aft-val" style="font-size:11px;">$${cpc}</td><td class="aft-val" style="font-size:11px;">${ctr}%</td><td class="aft-val" style="font-size:11px;">$${cpv}</td><td class="aft-val" style="font-size:11px;">${r.trials}</td><td class="aft-val" style="font-size:11px;">${r.trials>0?'$'+cpt:'—'}</td><td class="aft-val" style="font-size:11px;">${conv}%</td>`;
+    tbody.appendChild(tr);
+  });
+  const tot=document.createElement('tr'); tot.className='group-header';
+  tot.innerHTML=`<td>TOTAL</td><td style="text-align:right">$${tG.toLocaleString()}</td><td style="text-align:right">—</td><td style="text-align:right">${tI.toLocaleString()}</td><td style="text-align:right">$${(tG/tI*1000).toFixed(2)}</td><td style="text-align:right">${tC.toLocaleString()}</td><td style="text-align:right">$${(tG/tC).toFixed(2)}</td><td style="text-align:right">${(tC/tI*100).toFixed(2)}%</td><td style="text-align:right">$${(tG/tV).toFixed(2)}</td><td style="text-align:right">${tT}</td><td style="text-align:right">$${(tG/tT).toFixed(2)}</td><td style="text-align:right">${(tT/tV*100).toFixed(1)}%</td>`;
+  tbody.appendChild(tot);
+})();
+
+/* ── ALMA SALES FUNNEL ── */
+(function(){
+  // Resumen de oportunidades se genera con datos reales en renderAlmaSalesMejoras()
+  // Ver función renderAlmaSalesMejoras() más abajo
+})();
+
+/* ── ALMA MKT FUNNEL — barras visuales con datos reales ── */
+function renderAlmaMktFunnel(data) {
+  const el = document.getElementById('alma-mkt-funnel-bars');
+  if (!el) return;
+
+  // data viene de la API: { meta, ghl, stripe }
+  const meta   = data?.meta?.kpis   || {};
+  const ghl    = data?.ghl?.kpis    || {};
+  const stripe = data?.stripe?.kpis || {};
+
+  const gasto      = meta.gasto       || 0;
+  const imp        = meta.impresiones || 0;
+  const alcance    = meta.alcance     || 0;
+  const cpm        = meta.cpm         || 0;
+  const freq       = meta.freq        || 0;
+  const clics      = meta.clics       || 0;
+  const cpc        = meta.cpc         || 0;
+  const ctr        = meta.ctr         || 0;
+  const visitas    = meta.visitasPagina || 0;
+  const leads      = ghl.leadsAsignados || 0;
+  const cpl        = (leads > 0 && gasto > 0) ? (gasto/leads).toFixed(2) : 0;
+  const convPag    = (visitas > 0 && leads > 0) ? (leads/visitas*100).toFixed(1) : 0;
+  const agendas    = ghl.agendas      || 0;
+  const leadAgenda = (leads > 0 && agendas > 0) ? (agendas/leads*100).toFixed(1) : 0;
+  const cpCita     = (agendas > 0 && gasto > 0) ? (gasto/agendas).toFixed(2) : 0;
+  const calificados = ghl.clientesNuevos || 0;
+  const pctCalif   = ghl.pctCalif     || 0;
+  const cac        = (calificados > 0 && gasto > 0) ? Math.round(gasto/calificados) : 0;
+  const ticket     = ghl.ticketGHL    || 0;
+  const ventas     = ghl.ventasGHL    || 0;
+  const roi        = (gasto > 0 && ventas > 0) ? (ventas/gasto).toFixed(1) : 0;
+
+  const usd = n => n > 0 ? '$'+parseFloat(n).toLocaleString() : '—';
+  const pct = n => n > 0 ? n+'%' : '—';
+  const num = n => n > 0 ? parseInt(n).toLocaleString() : '—';
+
+  // Grupos con métricas, widths relativos al máximo del grupo, benchmark y tip
+  const groups = [
+    { label: 'PAUTA PAGADA', steps: [
+      { n:'Gasto Total',      m: usd(gasto),          w:100, st: gasto>0?'info':'warn',   tip: gasto>0 ? 'Presupuesto activo del periodo.' : '⚠ Sin gasto Meta activo este periodo.' },
+      { n:'# Impresiones',    m: num(imp),             w:95,  st: imp>0?'ok':'warn',        tip: imp>0 ? `CPM $${cpm} — Alcance a audiencia objetivo.` : '— Sin datos de impresiones.' },
+      { n:'# Alcance',        m: num(alcance),         w:88,  st: alcance>0?'ok':'warn',    tip: freq>0 ? `Frecuencia ${freq}x. Óptimo: 1.8–2.5x.` : '— Sin datos de alcance.' },
+      { n:'CPM',              m: usd(cpm),             w:82,  st: cpm>0&&cpm<28?'ok':cpm>35?'warn':'info', tip: cpm>0 ? (cpm<28?'CPM competitivo para high-ticket.':'⚠ CPM alto. Revisar audiencia.') : '— Sin datos.' },
+      { n:'Frecuencia',       m: freq>0?freq+'x':'—',  w:78,  st: freq>=1.8&&freq<=2.5?'ok':freq>2.5?'warn':'info', tip: freq>0 ? (freq<=2.5?'Frecuencia en rango óptimo.':'⚠ Frecuencia alta. Rotar creativos.') : '— Sin datos.' },
+    ]},
+    { label: 'TRÁFICO', steps: [
+      { n:'# Clics',          m: num(clics),           w:72,  st: clics>0?'ok':'warn',      tip: ctr>0 ? `CTR ${ctr}% — Benchmark: >1%.` : '— Sin datos de clics.' },
+      { n:'CPC',              m: usd(cpc),             w:66,  st: cpc>0&&cpc<1.5?'ok':cpc>2.5?'warn':'info', tip: cpc>0 ? (cpc<1.5?'CPC eficiente para high-ticket.':'⚠ CPC elevado. Revisar creativos.') : '— Sin datos.' },
+      { n:'% CTR',            m: pct(ctr),             w:60,  st: ctr>=1?'ok':ctr>0?'warn':'warn', tip: ctr>0 ? (ctr>=1?`CTR ${ctr}% — encima del benchmark 1%.`:`⚠ CTR ${ctr}% — debajo del 1% objetivo.`) : '— Sin datos.' },
+      { n:'# Visitas página', m: num(visitas),         w:55,  st: visitas>0?'ok':'warn',    tip: visitas>0 ? 'Visitantes que llegaron a la landing.' : '— Sin datos. Configurar evento landing_page_view en Meta.' },
+    ]},
+    { label: 'GENERACIÓN DE LEADS', steps: [
+      { n:'# Leads',          m: num(leads),           w:48,  st: leads>0?'ok':'warn',      tip: leads>0 ? `${leads} leads asignados al pipeline este periodo.` : '— Sin leads en el pipeline.' },
+      { n:'CPL',              m: usd(cpl),             w:42,  st: cpl>0&&cpl<15?'ok':cpl>25?'warn':'info', tip: cpl>0 ? (cpl<15?'CPL muy competitivo.':'⚠ CPL elevado. Optimizar targeting.') : '— Sin datos.' },
+      { n:'% CR (web→lead)',  m: pct(convPag),         w:38,  st: convPag>=20?'ok':convPag>0?'warn':'warn', tip: convPag>0 ? (convPag>=20?`Conv. ${convPag}% — encima del 20% objetivo.`:`⚠ Conv. ${convPag}% — debajo del 20%. Revisar landing.`) : '— Sin datos.' },
+    ]},
+    { label: 'AGENDAMIENTO', steps: [
+      { n:'% Lead→Agenda',   m: pct(leadAgenda),      w:34,  st: leadAgenda>=30?'ok':leadAgenda>0?'warn':'warn', tip: leadAgenda>0 ? (leadAgenda>=30?`${leadAgenda}% de leads agenda llamada. Benchmark: 30%+.`:`⚠ ${leadAgenda}% — debajo del 30% objetivo.`) : '— Sin datos.' },
+      { n:'# Agendas',       m: num(agendas),          w:30,  st: agendas>0?'ok':'warn',    tip: agendas>0 ? `${agendas} llamadas agendadas este periodo.` : '— Sin citas en el calendario.' },
+      { n:'Costo/Cita',      m: usd(cpCita),           w:26,  st: cpCita>0&&cpCita<50?'ok':cpCita>80?'warn':'info', tip: cpCita>0 ? `Inversión para conseguir cada cita.` : '— Sin datos.' },
+    ]},
+    { label: 'CALIFICACIÓN Y CIERRE', steps: [
+      { n:'% Calificados',   m: pct(pctCalif),         w:22,  st: pctCalif>=60?'ok':pctCalif>0?'warn':'warn', tip: pctCalif>0 ? (pctCalif>=60?`${pctCalif}% califican. Buen targeting.`:`⚠ ${pctCalif}% califican. Revisar calidad de leads.`) : '— Sin datos.' },
+      { n:'CAC',             m: cac>0?'$'+cac.toLocaleString():'—', w:18, st: cac>0&&ticket>0&&(ticket/cac)>=5?'ok':cac>0?'info':'warn', tip: cac>0&&ticket>0 ? `Ratio ticket/CAC: ${(ticket/cac).toFixed(1)}x. Objetivo: >5x.` : '— Sin datos.' },
+      { n:'Ticket Promedio', m: usd(ticket),           w:14,  st: ticket>0?'ok':'warn',     tip: ticket>0 ? `Valor promedio por cliente cerrado.` : '— Sin ventas en el periodo.' },
+      { n:'Ventas Totales',  m: usd(ventas),           w:10,  st: ventas>0?'ok':'warn',     tip: ventas>0 ? `Facturación total del periodo.` : '— Sin ventas registradas.' },
+      { n:'ROI',             m: roi>0?roi+'x':'—',     w:8,   st: roi>=5?'ok':roi>=3?'info':'warn', tip: roi>0 ? (roi>=5?`ROI ${roi}x — objetivo 5x superado. ✦`:`ROI ${roi}x — objetivo: >5x.`) : '— Sin datos suficientes.' },
+    ]},
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    html += `<div class="funnel-group-title">▸ ${g.label}</div>`;
+    g.steps.forEach((s, i) => {
+      const bar_c = s.st==='ok' ? '90,158,111' : s.st==='warn' ? '160,80,80' : '201,148,26';
+      const w = Math.max(s.w, 8);
+      html += `<div style="display:grid;grid-template-columns:130px 1fr 1fr;gap:8px;align-items:center;margin-bottom:5px;">
+        <div style="text-align:right;padding-right:10px;">
+          <div style="font-size:10px;color:var(--text3);">${s.n}</div>
+          <div style="font-size:14px;font-weight:600;color:var(--gold1);">${s.m}</div>
+        </div>
+        <div>
+          <div style="height:30px;width:${w}%;background:linear-gradient(90deg,rgba(${bar_c},.15),rgba(${bar_c},.45));border:1px solid rgba(${bar_c},.4);border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;color:var(--text1);min-width:50px;white-space:nowrap;overflow:hidden;">${s.n}</div>
+          ${i < g.steps.length-1 ? `<div style="width:2px;height:6px;background:var(--border1);margin:2px 0 2px calc(${w}%/2);"></div>` : ''}
+        </div>
+        <div class="funnel-alert ${s.st==='ok'?'ok':s.st==='warn'?'warn':'info'}" style="font-size:10px;padding:5px 8px;">${s.tip}</div>
+      </div>`;
+    });
+  });
+
+  el.innerHTML = html;
+}
+
+/* ── CLOCK ── */
+function updateClock(){
+  const now=new Date();
+  const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  let h=now.getHours(),m=now.getMinutes(),ampm=h>=12?'pm':'am';
+  h=h%12||12; const ms=m<10?'0'+m:m;
+  document.getElementById('liveTime').textContent=`${now.getDate()} de ${months[now.getMonth()]} del ${now.getFullYear()} · ${h}:${ms} ${ampm}`;
+}
+updateClock(); setInterval(updateClock,30000);
+
+/* ── CLOSER DATA ── */
+// Closers se cargan desde GHL API en loadGHLAlma()
+// El grid se actualiza con datos reales cuando la API responde
+
+// Initialize dynamic period titles on load
+(function(){
+  const now=new Date();
+  const months=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const label=`${months[now.getMonth()]} ${now.getFullYear()}`;
+  const finT=document.getElementById('fin-periodo-title');
+  if(finT) finT.textContent=`📊 Estado Financiero Puntual — ${label}`;
+  const metaT=document.getElementById('meta-daily-title');
+  if(metaT) metaT.textContent=`Movimiento Diario de la Pauta — ${label}`;
+})();
+
+// ── Carga inicial con datos reales al abrir el dashboard ──
+window.addEventListener('load', function(){
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const lastDay = new Date(y, now.getMonth()+1, 0).getDate();
+  const from = y+'-'+m+'-01';
+  const to   = y+'-'+m+'-'+String(lastDay).padStart(2,'0');
+  // Inicializar todos los date inputs con el mes completo
+  ['alma-sales','alma-mkt','stripe','meta','fin'].forEach(tab => {
+    const f = document.getElementById('dFrom-'+tab);
+    const t = document.getElementById('dTo-'+tab);
+    if(f) f.value = from;
+    if(t) t.value = to;
+  });
+  // Cargar datos reales al abrir el dashboard
+  loadStripeSA(from, to);
+  loadStripeSAForMeta(from, to);
+  loadMetaSA(from, to);
+  loadMetaALMA(from, to);
+  loadGHLAlma(from, to);
+  loadStripeALMA(from, to);
+  loadGHLAlmaForMkt(from, to);
+  // Cargar notificaciones en background
+  setTimeout(() => loadAllForNotifications(from, to), 3000);
+});
+
+// ── Generar análisis de mejoras basado en datos reales de GHL ──
+function renderAlmaSalesMejoras(kpis, closers) {
+  const box = document.getElementById('alma-mejoras-box');
+  if (!box) return;
+  if (!kpis || kpis.clientesNuevos === 0) {
+    box.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px;">El análisis aparecerá cuando haya datos reales cargados.</div>';
+    return;
+  }
+  const mejoras = [];
+  // Análisis basado en datos reales
+  if (kpis.convRate < 30) {
+    mejoras.push({badge:'mb-alto', titulo:'Conversión crítica (' + kpis.convRate + '%)', desc:'Menos de 3 de cada 10 llamadas se convierten. Revisar el script de ventas y hacer roleplay semanal. Objetivo: >40%.', impacto:'→ Cada +5pts de conversión = +' + Math.round(kpis.llamadasConfirmadas * 0.05) + ' clientes adicionales/mes.'});
+  }
+  if (kpis.pctAsistencia < 70) {
+    mejoras.push({badge:'mb-alto', titulo:'Asistencia baja (' + kpis.pctAsistencia + '%)', desc:'Menos del 70% de citas confirmadas asisten. Implementar recordatorios por WhatsApp 24h y 1h antes.', impacto:'→ Subir al 80% generaría +' + Math.round(kpis.citasConfirmadas * 0.1) + ' asistencias adicionales.'});
+  }
+  if (kpis.diasCierre > 3) {
+    mejoras.push({badge:'mb-medio', titulo:'Ciclo de cierre largo (' + kpis.diasCierre + ' días)', desc:'El promedio de días entre llamada y cierre supera 3 días. Implementar seguimiento estructurado en las primeras 24h.', impacto:'→ Reducir a 1-2 días puede mejorar la tasa de conversión en 10-15pts.'});
+  }
+  if (mejoras.length === 0) {
+    mejoras.push({badge:'', titulo:'Métricas dentro del objetivo', desc:'Todos los indicadores están en rangos aceptables. Mantener el ritmo actual y escalar lo que funciona.', impacto:''});
+  }
+  box.innerHTML = mejoras.map(m => 
+    '<div class="mejora-item">' + (m.badge ? '<span class="mejora-badge ' + m.badge + '">' + (m.badge==='mb-alto'?'Alto':'Medio') + '</span>' : '') +
+    '<div class="mejora-body"><div class="mejora-kpi">' + m.titulo + '</div>' +
+    '<div class="mejora-desc">' + m.desc + '</div>' +
+    (m.impacto ? '<div class="mejora-impacto">' + m.impacto + '</div>' : '') +
+    '</div></div>'
+  ).join('');
+}
+</script>
+</body>
+</html>
